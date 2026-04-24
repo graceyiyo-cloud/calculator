@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>旅費小管家</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icon.png">
+    
+    <style>
+        :root { --bg: #F4F1EA; --primary: #8E9775; --text: #6D8299; --accent: #E2D1C3; --danger: #C97D7D; }
+        * { box-sizing: border-box; font-family: -apple-system, sans-serif; }
+        body { background: var(--bg); color: var(--text); margin: 0; padding: 20px 20px 100px 20px; overflow-x: hidden; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-size: 0.8rem; margin-bottom: 5px; opacity: 0.8; }
+        input { width: 100%; padding: 12px; border: 1px solid var(--accent); border-radius: 10px; font-size: 1.1rem; color: var(--text); }
+        .quick-tags { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 10px; }
+        .tag { white-space: nowrap; background: var(--accent); border: none; padding: 8px 15px; border-radius: 20px; color: var(--text); }
+        .save-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; font-size: 1rem; }
+        .history-card { background: #fff; padding: 15px; border-radius: 12px; margin-top: 10px; border-left: 5px solid var(--primary); position: relative; }
+        .time-input { border: none; font-size: 0.75rem; color: #999; margin-bottom: 5px; width: 100%; background: transparent; }
+        .del-btn { position: absolute; right: 15px; top: 15px; color: var(--danger); border: none; background: none; font-size: 1.2rem; }
+        .total-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--primary); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; z-index: 1000; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div class="quick-tags">
+            <button class="tag" onclick="setRate(0.215)">日圓 JPY</button>
+            <button class="tag" onclick="setRate(32.5)">美金 USD</button>
+            <button class="tag" onclick="setRate(0.024)">韓元 KRW</button>
+        </div>
+        <div class="input-group"><label>匯率 (1外幣=?台幣)</label><input type="number" id="rate" value="0.215" oninput="calculate()"></div>
+        <div class="input-group"><label>外幣金額</label><input type="number" id="foreign" placeholder="輸入金額" oninput="calculate()"></div>
+        <div class="input-group"><label>折合台幣</label><input type="number" id="twd" readonly placeholder="自動計算"></div>
+        <div class="input-group"><label>品名備註</label><input type="text" id="note" placeholder="買了什麼？"></div>
+        <button class="save-btn" onclick="askLocation()">儲存消費紀錄</button>
+    </div>
+
+    <h3 style="margin-bottom: 10px;">消費歷史</h3>
+    <div id="historyList"></div>
+
+    <div class="total-bar"><span>累計總支出</span><span id="totalSum" style="font-size: 1.4rem; font-weight: bold;">TWD 0</span></div>
+
+    <script>
+        let history = JSON.parse(localStorage.getItem('travel_notes') || '[]');
+
+        function calculate() {
+            const r = document.getElementById('rate').value || 0;
+            const f = document.getElementById('foreign').value || 0;
+            document.getElementById('twd').value = Math.round(r * f);
+        }
+
+        function setRate(v) { document.getElementById('rate').value = v; calculate(); }
+
+        function askLocation() {
+            if (!document.getElementById('foreign').value) { alert('請先輸入金額喔！'); return; }
+            const btn = document.querySelector('.save-btn');
+            btn.innerText = "正在記錄地點...";
+            navigator.geolocation.getCurrentPosition((pos) => {
+                save(`${pos.coords.latitude.toFixed(2)}, ${pos.coords.longitude.toFixed(2)}`);
+            }, () => { save("未知地點"); });
+        }
+
+        function save(loc) {
+            const record = {
+                id: Date.now(),
+                note: document.getElementById('note').value || '未命名項目',
+                f: document.getElementById('foreign').value,
+                t: document.getElementById('twd').value,
+                time: new Date().toISOString().slice(0, 16),
+                loc: loc
+            };
+            history.unshift(record);
+            localStorage.setItem('travel_notes', JSON.stringify(history));
+            render();
+            document.querySelector('.save-btn').innerText = "儲存消費紀錄";
+            document.getElementById('note').value = '';
+            document.getElementById('foreign').value = '';
+        }
+
+        function deleteItem(id) {
+            if (confirm("確定要刪除這筆紀錄嗎？")) {
+                history = history.filter(h => h.id !== id);
+                localStorage.setItem('travel_notes', JSON.stringify(history));
+                render();
+            }
+        }
+
+        function render() {
+            const list = document.getElementById('historyList');
+            let sum = 0;
+            list.innerHTML = history.map(h => {
+                sum += parseInt(h.t);
+                return `
+                    <div class="history-card">
+                        <input type="datetime-local" class="time-input" value="${h.time}">
+                        <div style="font-weight:bold">${h.note}</div>
+                        <div>${h.f} ➔ <span style="color:var(--primary)">$${h.t} TWD</span></div>
+                        <div style="font-size:0.7rem; color:#bbb">📍 ${h.loc}</div>
+                        <button class="del-btn" onclick="deleteItem(${h.id})">✕</button>
+                    </div>`;
+            }).join('');
+            document.getElementById('totalSum').innerText = `TWD ${sum.toLocaleString()}`;
+        }
+        render();
+    </script>
+</body>
+</html>
