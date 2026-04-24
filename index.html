@@ -13,11 +13,11 @@
     <style>
         :root { 
             --bg: #FFF9E1; --primary: #FF8C94; --secondary: #A8E6CF; 
-            --text: #5D5D5D; --accent: #FFD3B6; --white: #FFFFFF; --grey: #F0F0F0;
+            --text: #5D5D5D; --accent: #FFD3B6; --white: #FFFFFF;
         }
 
         * { box-sizing: border-box; font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; }
-        body { background-color: var(--bg); color: var(--text); margin: 0; padding: 10px 15px 70px 15px; overflow-x: hidden; }
+        body { background-color: var(--bg); color: var(--text); margin: 0; padding: 10px 15px 80px 15px; overflow-x: hidden; }
 
         .app-header { font-size: 1.3rem; font-weight: 900; margin: 10px 0; color: var(--primary); text-align: center; }
 
@@ -35,10 +35,8 @@
             -webkit-appearance: none;
         }
 
-        /* 統一的平行容器 */
         .flex-row { display: flex; align-items: center; gap: 8px; }
 
-        /* 輔助按鈕樣式 (重整、清空) */
         .side-btn { 
             border: none; border-radius: 12px; 
             width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center;
@@ -46,10 +44,8 @@
         }
         .refresh-btn { background: var(--secondary); box-shadow: 0 3px 0px #8DD3B8; }
         .clear-input-btn { background: #EEE; color: #999; box-shadow: 0 3px 0px #DDD; font-size: 1.3rem; }
-        
         .side-btn:active { transform: translateY(2px); box-shadow: none; }
 
-        /* 儲存按鈕：改為滿版 */
         .save-btn { 
             width: 100%; background: var(--primary); color: white; border: none; 
             padding: 14px; border-radius: 15px; font-weight: bold; font-size: 1.1rem; 
@@ -57,21 +53,34 @@
         }
         .save-btn:active { transform: translateY(3px); box-shadow: none; }
 
-        /* 歷史清單 */
+        /* 歷史紀錄區塊標題 */
+        .history-header { display: flex; justify-content: space-between; align-items: center; margin: 20px 5px 10px 5px; }
+        .history-title { font-size: 1rem; font-weight: bold; color: #AAA; }
+        .clear-all-btn { background: transparent; border: 1px solid #CCC; color: #AAA; padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; }
+
+        /* 歷史紀錄項目的按鈕前置 */
         .history-item { padding: 12px 5px; border-bottom: 1px dashed var(--accent); }
-        .item-title { font-size: 0.95rem; font-weight: bold; }
-        .item-sub { font-size: 0.75rem; color: #BBB; margin-top: 2px; }
-        .item-price { font-size: 1.1rem; font-weight: 900; color: var(--primary); }
-        
-        /* 編輯模式 */
-        .edit-mode input { margin-bottom: 5px; padding: 6px; font-size: 0.85rem; border: 1px solid var(--accent); }
-        .mini-btn { padding: 5px 12px; border-radius: 8px; border: none; font-size: 0.75rem; font-weight: bold; }
-        .btn-edit { background: #E1F5FE; color: #03A9F4; margin-right: 5px; }
-        .btn-del { background: #FFF0F0; color: var(--primary); }
+        .item-main { display: flex; align-items: flex-start; gap: 10px; }
+        .action-group { display: flex; gap: 5px; flex-shrink: 0; }
+        .icon-btn { 
+            width: 28px; height: 28px; border-radius: 8px; border: none; 
+            display: flex; align-items: center; justify-content: center; font-size: 0.85rem;
+        }
+        .btn-edit-icon { background: #E1F5FE; color: #03A9F4; }
+        .btn-del-icon { background: #FFF0F0; color: var(--primary); }
+
+        .item-info { flex: 1; min-width: 0; }
+        .item-title { font-size: 0.95rem; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .item-sub { font-size: 0.7rem; color: #BBB; margin-top: 2px; }
+        .item-price-group { text-align: right; flex-shrink: 0; }
+        .item-price { font-size: 1.05rem; font-weight: 900; color: var(--primary); }
+        .item-original { font-size: 0.7rem; color: #CCC; }
+
+        .edit-mode input { margin-bottom: 6px; padding: 6px; font-size: 0.85rem; border: 1px solid var(--accent); border-radius: 8px; }
 
         .total-bar { 
             position: fixed; bottom: 0; left: 0; width: 100%; background: var(--white); 
-            padding: 8px 20px; display: flex; justify-content: space-between; align-items: center; 
+            padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; 
             border-top: 2px solid var(--accent); border-radius: 20px 20px 0 0; z-index: 1000;
         }
     </style>
@@ -102,28 +111,33 @@
             <label>金額 (<span id="currLabel">JPY</span>)</label>
             <div class="flex-row">
                 <input type="number" id="foreign" placeholder="0" oninput="calculate()" style="flex: 1;">
-                <button class="side-btn clear-input-btn" onclick="resetForm()" title="清空全部">✕</button>
+                <button class="side-btn clear-input-btn" onclick="resetForm()">✕</button>
             </div>
         </div>
 
         <div class="input-group">
-            <label>折合台幣 (TWD) - 亦可輸入反推</label>
+            <label>折合台幣 (TWD) - 亦可反推</label>
             <input type="number" id="twd" placeholder="0" oninput="calculateReverse()">
         </div>
 
         <div class="flex-row" style="margin-bottom: 10px;">
-            <div style="flex: 1;"><label>品名</label><input type="text" id="note" placeholder="買什麼？"></div>
-            <div style="flex: 1;"><label>地點</label><input type="text" id="locName" placeholder="哪家店？"></div>
+            <div style="flex: 1;"><label>品名</label><input type="text" id="note" placeholder="備註"></div>
+            <div style="flex: 1;"><label>地點</label><input type="text" id="locName" placeholder="地點"></div>
         </div>
 
         <button class="save-btn" onclick="save()">把這筆記下來！ ✍️</button>
+    </div>
+
+    <div class="history-header">
+        <span class="history-title">消費紀錄</span>
+        <button class="clear-all-btn" onclick="clearAllHistory()">清空全部</button>
     </div>
 
     <div id="historyList"></div>
 
     <div class="total-bar">
         <span style="font-weight: bold; color: #AAA; font-size: 0.85rem;">累積花費</span>
-        <span id="totalSum" style="font-size: 1.2rem; font-weight: 900; color: var(--primary);">0</span>
+        <span id="totalSum" style="font-size: 1.3rem; font-weight: 900; color: var(--primary);">0</span>
     </div>
 
     <script>
@@ -132,7 +146,6 @@
         let currentCurrency = localStorage.getItem('last_curr') || 'JPY';
         let editingId = null;
 
-        // 初始化設定
         document.getElementById('locName').value = localStorage.getItem('last_loc') || '';
         document.getElementById('currencySelect').value = currentCurrency;
         document.getElementById('currLabel').innerText = currentCurrency;
@@ -148,9 +161,7 @@
         function calculateReverse() {
             const r = document.getElementById('rate').value || 0;
             const t = document.getElementById('twd').value || 0;
-            if (r > 0) {
-                document.getElementById('foreign').value = t > 0 ? (t / r).toFixed(2) : "";
-            }
+            if (r > 0) document.getElementById('foreign').value = t > 0 ? (t / r).toFixed(2) : "";
         }
 
         function resetForm() {
@@ -210,6 +221,13 @@
             document.getElementById('twd').value = '';
         }
 
+        function clearAllHistory() {
+            if (confirm("確定要清空『全部』的消費紀錄嗎？這沒辦法復原喔！")) {
+                history = [];
+                syncData();
+            }
+        }
+
         function syncData() {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
             render();
@@ -230,7 +248,7 @@
         }
 
         function deleteItem(id) {
-            if (confirm("確定刪除嗎？")) {
+            if (confirm("要刪除這筆嗎？")) {
                 history = history.filter(h => h.id !== id);
                 syncData();
             }
@@ -243,29 +261,29 @@
                 sum += parseInt(h.t);
                 if (editingId === h.id) {
                     return `<div class="history-item edit-mode">
-                        <label>品名</label><input type="text" id="edit-note-${h.id}" value="${h.note}">
-                        <label>地點</label><input type="text" id="edit-loc-${h.id}" value="${h.loc}">
-                        <label>金額 (${h.curr})</label><input type="number" id="edit-f-${h.id}" value="${h.f}">
-                        <label>時間</label><input type="datetime-local" id="edit-time-${h.id}" value="${h.time}">
+                        <input type="text" id="edit-note-${h.id}" value="${h.note}">
+                        <input type="text" id="edit-loc-${h.id}" value="${h.loc}" placeholder="補填地點">
+                        <input type="number" id="edit-f-${h.id}" value="${h.f}">
+                        <input type="datetime-local" id="edit-time-${h.id}" value="${h.time}">
                         <div style="display:flex; gap:5px; margin-top:5px;">
-                            <button class="mini-btn" style="background:var(--secondary)" onclick="saveEdit(${h.id})">確認</button>
-                            <button class="mini-btn" style="background:#EEE" onclick="toggleEdit(null)">取消</button>
+                            <button class="mini-btn" style="background:var(--secondary); border:none; padding:5px 10px; border-radius:5px;" onclick="saveEdit(${h.id})">存</button>
+                            <button class="mini-btn" style="background:#EEE; border:none; padding:5px 10px; border-radius:5px;" onclick="toggleEdit(null)">取消</button>
                         </div>
                     </div>`;
                 } else {
                     return `<div class="history-item">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                            <div style="flex:1">
+                        <div class="item-main">
+                            <div class="action-group">
+                                <button class="icon-btn btn-edit-icon" onclick="toggleEdit(${h.id})">✏️</button>
+                                <button class="icon-btn btn-del-icon" onclick="deleteItem(${h.id})">✕</button>
+                            </div>
+                            <div class="item-info">
                                 <div class="item-title">${h.note}${h.loc ? `<span style="font-size:0.7rem; color:#CCC; font-weight:normal;"> @ ${h.loc}</span>` : ''}</div>
                                 <div class="item-sub">${h.time.replace('T', ' ')}</div>
-                                <div style="margin-top:5px;">
-                                    <button class="mini-btn btn-edit" onclick="toggleEdit(${h.id})">✏️ 改</button>
-                                    <button class="mini-btn btn-del" onclick="deleteItem(${h.id})">✕ 刪</button>
-                                </div>
                             </div>
-                            <div style="text-align:right">
+                            <div class="item-price-group">
                                 <div class="item-price">$${parseInt(h.t).toLocaleString()}</div>
-                                <div style="font-size:0.75rem; color:#CCC">${h.f} ${h.curr}</div>
+                                <div class="item-original">${h.f} ${h.curr}</div>
                             </div>
                         </div>
                     </div>`;
