@@ -11,142 +11,82 @@
     <link rel="apple-touch-icon" href="icon.png">
     
     <style>
-        /* 可愛旅遊風格配色 */
         :root { 
-            --bg: #FFF9E1;        /* 嫩黃色背景 */
-            --primary: #FF8C94;   /* 珊瑚粉紅 */
-            --secondary: #A8E6CF; /* 嫩綠色 */
+            --bg: #FFF9E1; 
+            --primary: #FF8C94; 
+            --secondary: #A8E6CF; 
             --text: #5D5D5D; 
-            --accent: #FFD3B6;    /* 粉橘色 */
+            --accent: #FFD3B6; 
             --white: #FFFFFF;
         }
 
-        * { box-sizing: border-box; font-family: "Comic Sans MS", "PingFang TC", "Microsoft JhengHei", sans-serif; }
-        
-        body { 
-            background-color: var(--bg); 
-            color: var(--text); 
-            margin: 0; 
-            padding: 15px 15px 100px 15px; 
-            overflow-x: hidden;
-        }
+        * { box-sizing: border-box; font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; }
+        body { background-color: var(--bg); color: var(--text); margin: 0; padding: 10px 15px 70px 15px; overflow-x: hidden; }
 
-        .app-header { 
-            font-size: 1.5rem; 
-            font-weight: 900; 
-            margin: 10px 0 20px 0; 
-            color: var(--primary); 
-            text-align: center;
-            text-shadow: 2px 2px 0px var(--white);
-        }
+        .app-header { font-size: 1.3rem; font-weight: 900; margin: 10px 0; color: var(--primary); text-align: center; }
 
-        /* 卡片設計：超圓潤邊角 */
         .card { 
             background: var(--white); 
-            padding: 20px; 
-            border-radius: 25px; 
-            box-shadow: 0 8px 0px var(--accent); 
-            margin-bottom: 25px; 
-            border: 3px solid var(--accent);
+            padding: 15px; 
+            border-radius: 20px; 
+            box-shadow: 0 5px 0px var(--accent); 
+            margin-bottom: 15px; 
+            border: 2px solid var(--accent);
         }
 
-        .input-group { margin-bottom: 15px; }
-        label { display: block; font-size: 0.85rem; margin-bottom: 6px; font-weight: bold; color: #888; }
+        .input-group { margin-bottom: 10px; }
+        label { display: block; font-size: 0.8rem; margin-bottom: 4px; font-weight: bold; color: #AAA; }
         
-        input { 
-            width: 100%; 
-            padding: 12px; 
-            border: 2px solid #EEE; 
-            border-radius: 15px; 
-            font-size: 1.1rem; 
-            color: var(--text); 
-            background: #FFF;
-            transition: 0.3s;
+        input, select { 
+            width: 100%; padding: 10px; border: 2px solid #F5F5F5; 
+            border-radius: 12px; font-size: 1rem; color: var(--text); background: #FAFAFA;
+            -webkit-appearance: none; /* 移除手機預設樣式 */
         }
-        input:focus { outline: none; border-color: var(--primary); background: #FFF; }
+        select { background-image: url('data:image/svg+xml;utf8,<svg fill="%23FF8C94" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>'); background-repeat: no-repeat; background-position: right 10px center; }
 
-        /* 即時抓取按鈕樣式 */
         .rate-wrapper { display: flex; gap: 8px; align-items: flex-end; }
         .refresh-btn { 
-            background: var(--secondary); 
-            border: none; 
-            border-radius: 12px; 
-            padding: 10px; 
-            font-size: 1.2rem; 
-            cursor: pointer;
-            box-shadow: 0 4px 0px #8DD3B8;
+            background: var(--secondary); border: none; border-radius: 10px; 
+            padding: 8px 12px; font-size: 1rem; cursor: pointer;
+            box-shadow: 0 3px 0px #8DD3B8;
         }
-        .refresh-btn:active { transform: translateY(3px); box-shadow: none; }
+        .refresh-btn:active { transform: translateY(2px); box-shadow: none; }
 
-        /* 快捷標籤 */
-        .quick-tags { display: flex; gap: 10px; overflow-x: auto; padding: 5px 0 15px 0; -webkit-overflow-scrolling: touch; }
-        .tag { 
-            white-space: nowrap; 
-            background: var(--white); 
-            border: 2px solid var(--accent); 
-            padding: 8px 18px; 
-            border-radius: 20px; 
-            color: var(--text); 
-            font-size: 0.9rem; 
-            font-weight: bold;
-        }
-        .tag.active { background: var(--primary); color: white; border-color: var(--primary); }
-
-        /* 儲存按鈕：大大的彈性感 */
         .save-btn { 
-            width: 100%; 
-            background: var(--primary); 
-            color: white; 
-            border: none; 
-            padding: 16px; 
-            border-radius: 20px; 
-            font-weight: 900; 
-            font-size: 1.1rem; 
-            margin-top: 10px; 
-            box-shadow: 0 6px 0px #E57373;
+            width: 100%; background: var(--primary); color: white; border: none; 
+            padding: 12px; border-radius: 15px; font-weight: bold; font-size: 1rem; 
+            margin-top: 5px; box-shadow: 0 4px 0px #E57373;
         }
-        .save-btn:active { transform: translateY(4px); box-shadow: none; }
+        .save-btn:active { transform: translateY(3px); box-shadow: none; }
 
-        /* 歷史紀錄：簡約條列 */
-        .history-item { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            padding: 15px 10px; 
-            border-bottom: 2px dashed var(--accent); 
-        }
-        .item-title { font-size: 1rem; font-weight: bold; margin-bottom: 4px; }
-        .item-sub { font-size: 0.75rem; color: #AAA; }
-        .item-price { font-size: 1.1rem; font-weight: 900; color: var(--primary); }
-        .item-original { font-size: 0.75rem; color: #BBB; }
-        .del-btn { background: #FEE; border: none; color: var(--primary); font-size: 1rem; border-radius: 50%; width: 30px; height: 30px; margin-left: 10px; }
+        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 5px; border-bottom: 1px dashed var(--accent); }
+        .item-title { font-size: 0.95rem; font-weight: bold; }
+        .item-sub { font-size: 0.7rem; color: #BBB; margin-top: 2px; }
+        .item-price { font-size: 1rem; font-weight: 900; color: var(--primary); }
+        .item-original { font-size: 0.7rem; color: #CCC; }
+        
+        .del-btn { background: #FFF0F0; border: none; color: var(--primary); border-radius: 50%; width: 28px; height: 28px; margin-left: 10px; font-size: 0.8rem; }
 
-        /* 底部總計 */
         .total-bar { 
-            position: fixed; 
-            bottom: 0; 
-            left: 0; 
-            width: 100%; 
-            background: var(--white); 
-            padding: 20px 30px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            border-top: 3px solid var(--accent);
-            border-radius: 25px 25px 0 0;
+            position: fixed; bottom: 0; left: 0; width: 100%; background: var(--white); 
+            padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; 
+            border-top: 2px solid var(--accent); border-radius: 20px 20px 0 0; z-index: 1000;
         }
-        .total-amount { font-size: 1.5rem; font-weight: 900; color: var(--primary); }
+        .total-amount { font-size: 1.3rem; font-weight: 900; color: var(--primary); }
     </style>
 </head>
 <body>
 
-    <div class="app-header">✈️ 換匯計算機 🍱</div>
+    <div class="app-header">✈️ 換匯計算機</div>
 
     <div class="card">
-        <div class="quick-tags">
-            <button class="tag" onclick="changeCurr(0.215, 'JPY', this)">日圓 JPY</button>
-            <button class="tag" onclick="changeCurr(32.5, 'USD', this)">美金 USD</button>
-            <button class="tag" onclick="changeCurr(0.024, 'KRW', this)">韓元 KRW</button>
+        <div class="input-group">
+            <label>選擇幣別</label>
+            <select id="currencySelect" onchange="changeCurrBySelect()">
+                <option value="JPY" data-rate="0.215">日圓 JPY</option>
+                <option value="USD" data-rate="32.5">美金 USD</option>
+                <option value="KRW" data-rate="0.024">韓元 KRW</option>
+            </select>
         </div>
 
         <div class="rate-wrapper">
@@ -154,7 +94,7 @@
                 <label>手動匯率</label>
                 <input type="number" id="rate" step="0.0001" oninput="manualRateInput()">
             </div>
-            <button class="refresh-btn" onclick="fetchRate()" title="抓取最新匯率">🔄</button>
+            <button class="refresh-btn" onclick="fetchRate()">🔄</button>
         </div>
 
         <div class="input-group">
@@ -167,7 +107,7 @@
             <input type="number" id="twd" readonly placeholder="＝ 等於">
         </div>
 
-        <div style="display: flex; gap: 10px;">
+        <div style="display: flex; gap: 8px;">
             <div class="input-group" style="flex: 1;"><label>品名</label><input type="text" id="note" placeholder="買了什麼？"></div>
             <div class="input-group" style="flex: 1;"><label>地點</label><input type="text" id="locName" placeholder="哪家店？"></div>
         </div>
@@ -175,22 +115,22 @@
         <button class="save-btn" onclick="save()">把這筆記下來！ ✍️</button>
     </div>
 
-    <div id="historyList" style="margin-top: 10px;"></div>
+    <div id="historyList"></div>
 
     <div class="total-bar">
-        <span style="font-weight: bold; color: #999;">累積花費</span>
+        <span style="font-weight: bold; color: #AAA; font-size: 0.85rem;">累積花費</span>
         <span id="totalSum" class="total-amount">0</span>
     </div>
 
     <script>
-        let history = JSON.parse(localStorage.getItem('ex_cute_data') || '[]');
+        let history = JSON.parse(localStorage.getItem('ex_cute_v3') || '[]');
         let currentCurrency = localStorage.getItem('last_curr') || 'JPY';
         
-        // 初始化：讀取上次的地點與手動匯率
+        // 初始化
         document.getElementById('locName').value = localStorage.getItem('last_loc') || '';
+        document.getElementById('currencySelect').value = currentCurrency;
         document.getElementById('currLabel').innerText = currentCurrency;
         
-        // 匯率初始化邏輯：優先讀取儲存的手動匯率
         const savedRate = localStorage.getItem('manual_rate_' + currentCurrency);
         document.getElementById('rate').value = savedRate || 0.215;
 
@@ -200,24 +140,22 @@
             document.getElementById('twd').value = Math.round(r * f);
         }
 
-        // 手動輸入匯率時觸發存檔
         function manualRateInput() {
-            const r = document.getElementById('rate').value;
-            localStorage.setItem('manual_rate_' + currentCurrency, r);
+            localStorage.setItem('manual_rate_' + currentCurrency, document.getElementById('rate').value);
             calculate();
         }
 
-        function changeCurr(v, name, btn) {
+        function changeCurrBySelect() {
+            const select = document.getElementById('currencySelect');
+            const name = select.value;
+            const defaultRate = select.options[select.selectedIndex].getAttribute('data-rate');
+            
             currentCurrency = name;
             localStorage.setItem('last_curr', name);
             document.getElementById('currLabel').innerText = name;
             
-            // 嘗試讀取該幣別之前存過的手動匯率
             const r = localStorage.getItem('manual_rate_' + name);
-            document.getElementById('rate').value = r || v;
-
-            document.querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
-            if(btn) btn.classList.add('active');
+            document.getElementById('rate').value = r || defaultRate;
             calculate();
         }
 
@@ -225,19 +163,13 @@
             const btn = document.querySelector('.refresh-btn');
             btn.innerText = "⏳";
             try {
-                // 使用免費 API 抓取 (這裡以換算 TWD 為主)
                 const res = await fetch(`https://open.er-api.com/v6/latest/TWD`);
                 const data = await res.json();
-                const rateToTwd = 1 / data.rates[currentCurrency];
-                const finalRate = rateToTwd.toFixed(4);
-                
+                const finalRate = (1 / data.rates[currentCurrency]).toFixed(4);
                 document.getElementById('rate').value = finalRate;
                 localStorage.setItem('manual_rate_' + currentCurrency, finalRate);
                 calculate();
-                alert(`更新成功！目前 1 ${currentCurrency} = ${finalRate} TWD`);
-            } catch (e) {
-                alert("網路怪怪的，先手動輸入喔！");
-            }
+            } catch (e) { alert("網路異常"); }
             btn.innerText = "🔄";
         }
 
@@ -248,14 +180,12 @@
             const record = {
                 id: Date.now(),
                 note: document.getElementById('note').value || '小東西',
-                f: fAmount,
-                curr: currentCurrency,
-                t: document.getElementById('twd').value,
+                f: fAmount, curr: currentCurrency, t: document.getElementById('twd').value,
                 time: new Date().toISOString().slice(0, 16),
                 loc: loc
             };
             history.unshift(record);
-            localStorage.setItem('ex_cute_data', JSON.stringify(history));
+            localStorage.setItem('ex_cute_v3', JSON.stringify(history));
             localStorage.setItem('last_loc', loc);
             render();
             document.getElementById('note').value = '';
@@ -264,9 +194,9 @@
         }
 
         function deleteItem(id) {
-            if (confirm("確定要刪掉這筆可愛的紀錄嗎？")) {
+            if (confirm("確定刪除嗎？")) {
                 history = history.filter(h => h.id !== id);
-                localStorage.setItem('ex_cute_data', JSON.stringify(history));
+                localStorage.setItem('ex_cute_v3', JSON.stringify(history));
                 render();
             }
         }
@@ -276,10 +206,12 @@
             let sum = 0;
             list.innerHTML = history.map(h => {
                 sum += parseInt(h.t);
+                // 修正：如果沒有地點，則不顯示地點文字與標籤
+                const locInfo = h.loc ? `<span style="font-size:0.7rem; color:#CCC; font-weight:normal;"> @ ${h.loc}</span>` : '';
                 return `
                     <div class="history-item">
                         <div style="flex:1">
-                            <div class="item-title">${h.note} <span style="font-size:0.7rem; color:#CCC">@ ${h.loc || '隨地'}</span></div>
+                            <div class="item-title">${h.note}${locInfo}</div>
                             <div class="item-sub">${h.time.replace('T', ' ')}</div>
                         </div>
                         <div style="text-align:right">
