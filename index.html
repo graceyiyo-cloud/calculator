@@ -36,13 +36,21 @@
         }
         select { background-image: url('data:image/svg+xml;utf8,<svg fill="%23FF8C94" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>'); background-repeat: no-repeat; background-position: right 10px center; }
 
-        /* 調整按鈕位子：向上移動半行 */
-        .rate-wrapper { display: flex; gap: 8px; align-items: flex-end; }
+        /* 終極對齊方案：使用 align-items: center 確保絕對平行 */
+        .flex-center { 
+            display: flex; 
+            gap: 8px; 
+            align-items: center; /* 強制垂直置中對齊 */
+            justify-content: center;
+        }
+
         .refresh-btn { 
             background: var(--secondary); border: none; border-radius: 10px; 
-            padding: 8px 12px; font-size: 1rem; cursor: pointer;
+            width: 42px; height: 42px; /* 固定寬高與輸入框接近 */
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; cursor: pointer;
             box-shadow: 0 3px 0px #8DD3B8;
-            margin-bottom: 4px; /* 這裡微調向上 */
+            flex-shrink: 0; /* 防止按鈕被擠壓 */
         }
         .refresh-btn:active { transform: translateY(2px); box-shadow: none; }
 
@@ -52,21 +60,15 @@
             margin-top: 5px; box-shadow: 0 4px 0px #E57373;
         }
 
-        /* 歷史清單：修改為可編輯風格 */
         .history-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 5px; border-bottom: 1px dashed var(--accent); }
-        .edit-input { 
-            border: none; background: transparent; padding: 0; font-size: 0.95rem; 
-            font-weight: bold; color: var(--text); width: 100%;
-        }
+        .edit-input { border: none; background: transparent; padding: 0; font-size: 0.95rem; font-weight: bold; color: var(--text); width: 100%; }
         .edit-input:focus { outline: none; background: #FFF9E1; }
         .edit-loc { font-size: 0.75rem; color: #BBB; border: none; background: transparent; width: 100%; }
         .edit-time { border: none; background: transparent; font-size: 0.7rem; color: #CCC; width: 100%; }
 
         .item-price { font-size: 1rem; font-weight: 900; color: var(--primary); }
-        .item-original { font-size: 0.7rem; color: #CCC; }
         .del-btn { background: #FFF0F0; border: none; color: var(--primary); border-radius: 50%; width: 28px; height: 28px; margin-left: 10px; font-size: 0.8rem; }
 
-        /* 累積花費欄位再收窄 */
         .total-bar { 
             position: fixed; bottom: 0; left: 0; width: 100%; background: var(--white); 
             padding: 8px 20px; display: flex; justify-content: space-between; align-items: center; 
@@ -83,18 +85,18 @@
         <div class="input-group">
             <label>選擇幣別</label>
             <select id="currencySelect" onchange="changeCurrBySelect()">
-                <option value="JPY" data-rate="0.215">日圓 JPY</option>
+                <option value="JPY" data-rate="0.1977">日圓 JPY</option>
                 <option value="USD" data-rate="32.5">美金 USD</option>
                 <option value="KRW" data-rate="0.024">韓元 KRW</option>
             </select>
         </div>
 
-        <div class="rate-wrapper">
-            <div class="input-group" style="flex: 1;">
-                <label>手動匯率</label>
-                <input type="number" id="rate" step="0.0001" oninput="manualRateInput()">
+        <div class="input-group">
+            <label>手動匯率</label>
+            <div class="flex-center">
+                <input type="number" id="rate" step="0.0001" oninput="manualRateInput()" style="flex: 1;">
+                <button class="refresh-btn" onclick="fetchRate()">🔄</button>
             </div>
-            <button class="refresh-btn" onclick="fetchRate()">🔄</button>
         </div>
 
         <div class="input-group">
@@ -107,9 +109,9 @@
             <input type="number" id="twd" readonly placeholder="＝ 等於">
         </div>
 
-        <div style="display: flex; gap: 8px;">
-            <div class="input-group" style="flex: 1;"><label>品名</label><input type="text" id="note" placeholder="買了什麼？"></div>
-            <div class="input-group" style="flex: 1;"><label>地點</label><input type="text" id="locName" placeholder="哪家店？"></div>
+        <div class="flex-center" style="margin-bottom: 10px;">
+            <div style="flex: 1;"><label>品名</label><input type="text" id="note" placeholder="買了什麼？"></div>
+            <div style="flex: 1;"><label>地點</label><input type="text" id="locName" placeholder="哪家店？"></div>
         </div>
 
         <button class="save-btn" onclick="save()">把這筆記下來！ ✍️</button>
@@ -123,7 +125,9 @@
     </div>
 
     <script>
-        let history = JSON.parse(localStorage.getItem('ex_cute_v4') || '[]');
+        // 固定資料庫鍵名，確保資料不因代碼更新而消失
+        const STORAGE_KEY = 'exchange_master_data_v1';
+        let history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
         let currentCurrency = localStorage.getItem('last_curr') || 'JPY';
         
         document.getElementById('locName').value = localStorage.getItem('last_loc') || '';
@@ -131,7 +135,7 @@
         document.getElementById('currLabel').innerText = currentCurrency;
         
         const savedRate = localStorage.getItem('manual_rate_' + currentCurrency);
-        document.getElementById('rate').value = savedRate || 0.215;
+        document.getElementById('rate').value = savedRate || 0.1977;
 
         function calculate() {
             const r = document.getElementById('rate').value || 0;
@@ -156,6 +160,7 @@
 
         async function fetchRate() {
             const btn = document.querySelector('.refresh-btn');
+            const originalText = btn.innerText;
             btn.innerText = "⏳";
             try {
                 const res = await fetch(`https://open.er-api.com/v6/latest/TWD`);
@@ -165,7 +170,7 @@
                 localStorage.setItem('manual_rate_' + currentCurrency, finalRate);
                 calculate();
             } catch (e) { alert("網路異常"); }
-            btn.innerText = "🔄";
+            btn.innerText = originalText;
         }
 
         function save() {
@@ -186,7 +191,6 @@
             document.getElementById('twd').value = '';
         }
 
-        // 修改現有紀錄的函數
         function updateRecord(id, field, value) {
             const index = history.findIndex(h => h.id === id);
             if (index !== -1) {
@@ -203,7 +207,7 @@
         }
 
         function syncData() {
-            localStorage.setItem('ex_cute_v4', JSON.stringify(history));
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
             render();
         }
 
@@ -212,17 +216,16 @@
             let sum = 0;
             list.innerHTML = history.map(h => {
                 sum += parseInt(h.t);
-                // 邏輯修正：如果沒有地點且非編輯狀態，本來不顯示，但為了讓你可以事後「補填」，我們顯示一個透明的輸入框
                 return `
                     <div class="history-item">
                         <div style="flex:1">
                             <input class="edit-input" value="${h.note}" onchange="updateRecord(${h.id}, 'note', this.value)">
-                            ${h.loc || h.note === h.note ? `<input class="edit-loc" value="${h.loc}" placeholder="+ 新增地點" onchange="updateRecord(${h.id}, 'loc', this.value)">` : ''}
+                            <input class="edit-loc" value="${h.loc}" placeholder="+ 補填地點" onchange="updateRecord(${h.id}, 'loc', this.value)">
                             <input type="datetime-local" class="edit-time" value="${h.time}" onchange="updateRecord(${h.id}, 'time', this.value)">
                         </div>
                         <div style="text-align:right">
                             <div class="item-price">$${parseInt(h.t).toLocaleString()}</div>
-                            <div class="item-original">${h.f} ${h.curr}</div>
+                            <div style="font-size:0.7rem; color:#CCC">${h.f} ${h.curr}</div>
                         </div>
                         <button class="del-btn" onclick="deleteItem(${h.id})">✕</button>
                     </div>`;
