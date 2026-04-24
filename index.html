@@ -3,50 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>旅費小管家</title>
+    <title>即時換匯計算機</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="icon.png">
     
     <style>
-        :root { --bg: #F4F1EA; --primary: #8E9775; --text: #6D8299; --accent: #E2D1C3; --danger: #C97D7D; }
-        * { box-sizing: border-box; font-family: -apple-system, sans-serif; }
-        body { background: var(--bg); color: var(--text); margin: 0; padding: 20px 20px 100px 20px; overflow-x: hidden; }
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        .input-group { margin-bottom: 15px; }
-        label { display: block; font-size: 0.8rem; margin-bottom: 5px; opacity: 0.8; }
-        input { width: 100%; padding: 12px; border: 1px solid var(--accent); border-radius: 10px; font-size: 1.1rem; color: var(--text); }
-        .quick-tags { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 10px; }
-        .tag { white-space: nowrap; background: var(--accent); border: none; padding: 8px 15px; border-radius: 20px; color: var(--text); }
-        .save-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; font-size: 1rem; }
-        .history-card { background: #fff; padding: 15px; border-radius: 12px; margin-top: 10px; border-left: 5px solid var(--primary); position: relative; }
-        .time-input { border: none; font-size: 0.75rem; color: #999; margin-bottom: 5px; width: 100%; background: transparent; }
-        .del-btn { position: absolute; right: 15px; top: 15px; color: var(--danger); border: none; background: none; font-size: 1.2rem; }
-        .total-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--primary); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; z-index: 1000; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); }
+        :root { --bg: #F8F6F2; --primary: #8E9775; --text: #5A6A7A; --accent: #E2D1C3; --line: #EEE; }
+        * { box-sizing: border-box; font-family: -apple-system, "Noto Sans TC", sans-serif; }
+        
+        body { background: var(--bg); color: var(--text); margin: 0; padding: 15px 15px 100px 15px; overflow-x: hidden; }
+        
+        /* 輸入區卡片 */
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); margin-bottom: 20px; }
+        .input-group { margin-bottom: 12px; }
+        label { display: block; font-size: 0.75rem; margin-bottom: 4px; color: #999; }
+        input { width: 100%; padding: 10px; border: 1px solid #F0F0F0; border-radius: 8px; font-size: 1rem; color: var(--text); background: #FAFAFA; }
+        input:focus { outline: none; border-color: var(--accent); background: white; }
+
+        /* 快捷鍵：橫向捲動 */
+        .quick-tags { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 5px; -webkit-overflow-scrolling: touch; }
+        .tag { white-space: nowrap; background: var(--accent); border: none; padding: 6px 14px; border-radius: 15px; color: var(--text); font-size: 0.85rem; cursor: pointer; }
+        .tag.active { background: var(--primary); color: white; }
+
+        .save-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; font-size: 1rem; margin-top: 10px; transition: 0.2s; }
+        .save-btn:active { opacity: 0.8; transform: scale(0.98); }
+
+        /* 歷史紀錄：極簡條列式 */
+        .history-section { margin-top: 25px; }
+        .history-item { 
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 5px; border-bottom: 1px solid var(--line); position: relative;
+        }
+        .item-left { flex: 1; }
+        .item-right { text-align: right; margin-left: 10px; }
+        
+        .item-title { font-size: 0.95rem; font-weight: 500; margin-bottom: 2px; }
+        .item-sub { font-size: 0.75rem; color: #BBB; }
+        .item-price { font-size: 1rem; font-weight: bold; color: var(--primary); }
+        .item-original { font-size: 0.7rem; color: #AAA; }
+
+        .del-btn { background: none; border: none; color: #DDD; font-size: 1rem; padding: 5px; margin-left: 10px; cursor: pointer; }
+
+        /* 底部總計 */
+        .total-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; z-index: 1000; border-top: 1px solid var(--line); }
+        .total-label { font-size: 0.85rem; color: #999; }
+        .total-amount { font-size: 1.3rem; font-weight: bold; color: var(--primary); }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <div class="quick-tags">
-            <button class="tag" onclick="setRate(0.215)">日圓 JPY</button>
-            <button class="tag" onclick="setRate(32.5)">美金 USD</button>
-            <button class="tag" onclick="setRate(0.024)">韓元 KRW</button>
+        <div class="quick-tags" id="tagList">
+            <button class="tag" onclick="setRate(0.215, 'JPY', this)">日圓 JPY</button>
+            <button class="tag" onclick="setRate(32.5, 'USD', this)">美金 USD</button>
+            <button class="tag" onclick="setRate(0.024, 'KRW', this)">韓元 KRW</button>
         </div>
-        <div class="input-group"><label>匯率 (1外幣=?台幣)</label><input type="number" id="rate" value="0.215" oninput="calculate()"></div>
-        <div class="input-group"><label>外幣金額</label><input type="number" id="foreign" placeholder="輸入金額" oninput="calculate()"></div>
-        <div class="input-group"><label>折合台幣</label><input type="number" id="twd" readonly placeholder="自動計算"></div>
-        <div class="input-group"><label>品名備註</label><input type="text" id="note" placeholder="買了什麼？"></div>
-        <button class="save-btn" onclick="askLocation()">儲存消費紀錄</button>
+
+        <div style="display: flex; gap: 10px;">
+            <div class="input-group" style="flex: 1;">
+                <label>匯率</label>
+                <input type="number" id="rate" value="0.215" oninput="calculate()">
+            </div>
+            <div class="input-group" style="flex: 2;">
+                <label>外幣金額 (<span id="currLabel">JPY</span>)</label>
+                <input type="number" id="foreign" placeholder="0" oninput="calculate()">
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>折合台幣 (TWD)</label>
+            <input type="number" id="twd" readonly placeholder="自動計算">
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <div class="input-group" style="flex: 1;">
+                <label>品名</label>
+                <input type="text" id="note" placeholder="買了什麼？">
+            </div>
+            <div class="input-group" style="flex: 1;">
+                <label>地點</label>
+                <input type="text" id="locName" placeholder="哪家店？">
+            </div>
+        </div>
+
+        <button class="save-btn" onclick="save()">儲存紀錄</button>
     </div>
 
-    <h3 style="margin-bottom: 10px;">消費歷史</h3>
-    <div id="historyList"></div>
+    <div class="history-section">
+        <div id="historyList"></div>
+    </div>
 
-    <div class="total-bar"><span>累計總支出</span><span id="totalSum" style="font-size: 1.4rem; font-weight: bold;">TWD 0</span></div>
+    <div class="total-bar">
+        <span class="total-label">累計總支出</span>
+        <span id="totalSum" class="total-amount">TWD 0</span>
+    </div>
 
     <script>
-        let history = JSON.parse(localStorage.getItem('travel_notes') || '[]');
+        let history = JSON.parse(localStorage.getItem('travel_v2') || '[]');
+        let currentCurrency = 'JPY';
+
+        // 初始化：讀取上次的地點
+        document.getElementById('locName').value = localStorage.getItem('last_loc') || '';
 
         function calculate() {
             const r = document.getElementById('rate').value || 0;
@@ -54,38 +112,49 @@
             document.getElementById('twd').value = Math.round(r * f);
         }
 
-        function setRate(v) { document.getElementById('rate').value = v; calculate(); }
-
-        function askLocation() {
-            if (!document.getElementById('foreign').value) { alert('請先輸入金額喔！'); return; }
-            const btn = document.querySelector('.save-btn');
-            btn.innerText = "正在記錄地點...";
-            navigator.geolocation.getCurrentPosition((pos) => {
-                save(`${pos.coords.latitude.toFixed(2)}, ${pos.coords.longitude.toFixed(2)}`);
-            }, () => { save("未知地點"); });
+        function setRate(v, name, btn) {
+            document.getElementById('rate').value = v;
+            currentCurrency = name;
+            document.getElementById('currLabel').innerText = name;
+            
+            // 切換按鈕顏色
+            document.querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+            
+            calculate();
         }
 
-        function save(loc) {
+        function save() {
+            const fAmount = document.getElementById('foreign').value;
+            if (!fAmount) return;
+
+            const loc = document.getElementById('locName').value;
             const record = {
                 id: Date.now(),
-                note: document.getElementById('note').value || '未命名項目',
-                f: document.getElementById('foreign').value,
+                note: document.getElementById('note').value || '未命名',
+                f: fAmount,
+                curr: currentCurrency,
                 t: document.getElementById('twd').value,
                 time: new Date().toISOString().slice(0, 16),
                 loc: loc
             };
+
             history.unshift(record);
-            localStorage.setItem('travel_notes', JSON.stringify(history));
+            localStorage.setItem('travel_v2', JSON.stringify(history));
+            localStorage.setItem('last_loc', loc); // 記憶地點
+            
             render();
-            document.querySelector('.save-btn').innerText = "儲存消費紀錄";
+            
+            // 清空輸入，保留地點
             document.getElementById('note').value = '';
             document.getElementById('foreign').value = '';
+            document.getElementById('twd').value = '';
         }
 
         function deleteItem(id) {
-            if (confirm("確定要刪除這筆紀錄嗎？")) {
+            if (confirm("確定刪除嗎？")) {
                 history = history.filter(h => h.id !== id);
-                localStorage.setItem('travel_notes', JSON.stringify(history));
+                localStorage.setItem('travel_v2', JSON.stringify(history));
                 render();
             }
         }
@@ -95,17 +164,24 @@
             let sum = 0;
             list.innerHTML = history.map(h => {
                 sum += parseInt(h.t);
+                // 簡化時間顯示
+                const displayTime = h.time.replace('T', ' ');
                 return `
-                    <div class="history-card">
-                        <input type="datetime-local" class="time-input" value="${h.time}">
-                        <div style="font-weight:bold">${h.note}</div>
-                        <div>${h.f} ➔ <span style="color:var(--primary)">$${h.t} TWD</span></div>
-                        <div style="font-size:0.7rem; color:#bbb">📍 ${h.loc}</div>
+                    <div class="history-item">
+                        <div class="item-left">
+                            <div class="item-title">${h.note} <span style="font-size:0.7rem; color:#CCC; font-weight:normal;">@ ${h.loc || '無地點'}</span></div>
+                            <div class="item-sub">${displayTime}</div>
+                        </div>
+                        <div class="item-right">
+                            <div class="item-price">$${parseInt(h.t).toLocaleString()}</div>
+                            <div class="item-original">${h.f} ${h.curr}</div>
+                        </div>
                         <button class="del-btn" onclick="deleteItem(${h.id})">✕</button>
                     </div>`;
             }).join('');
             document.getElementById('totalSum').innerText = `TWD ${sum.toLocaleString()}`;
         }
+        
         render();
     </script>
 </body>
