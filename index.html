@@ -12,12 +12,8 @@
     
     <style>
         :root { 
-            --bg: #FFF9E1; 
-            --primary: #FF8C94; 
-            --secondary: #A8E6CF; 
-            --text: #5D5D5D; 
-            --accent: #FFD3B6; 
-            --white: #FFFFFF;
+            --bg: #FFF9E1; --primary: #FF8C94; --secondary: #A8E6CF; 
+            --text: #5D5D5D; --accent: #FFD3B6; --white: #FFFFFF;
         }
 
         * { box-sizing: border-box; font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; }
@@ -26,12 +22,8 @@
         .app-header { font-size: 1.3rem; font-weight: 900; margin: 10px 0; color: var(--primary); text-align: center; }
 
         .card { 
-            background: var(--white); 
-            padding: 15px; 
-            border-radius: 20px; 
-            box-shadow: 0 5px 0px var(--accent); 
-            margin-bottom: 15px; 
-            border: 2px solid var(--accent);
+            background: var(--white); padding: 15px; border-radius: 20px; 
+            box-shadow: 0 5px 0px var(--accent); margin-bottom: 15px; border: 2px solid var(--accent);
         }
 
         .input-group { margin-bottom: 10px; }
@@ -40,15 +32,17 @@
         input, select { 
             width: 100%; padding: 10px; border: 2px solid #F5F5F5; 
             border-radius: 12px; font-size: 1rem; color: var(--text); background: #FAFAFA;
-            -webkit-appearance: none; /* 移除手機預設樣式 */
+            -webkit-appearance: none;
         }
         select { background-image: url('data:image/svg+xml;utf8,<svg fill="%23FF8C94" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>'); background-repeat: no-repeat; background-position: right 10px center; }
 
+        /* 調整按鈕位子：向上移動半行 */
         .rate-wrapper { display: flex; gap: 8px; align-items: flex-end; }
         .refresh-btn { 
             background: var(--secondary); border: none; border-radius: 10px; 
             padding: 8px 12px; font-size: 1rem; cursor: pointer;
             box-shadow: 0 3px 0px #8DD3B8;
+            margin-bottom: 4px; /* 這裡微調向上 */
         }
         .refresh-btn:active { transform: translateY(2px); box-shadow: none; }
 
@@ -57,22 +51,28 @@
             padding: 12px; border-radius: 15px; font-weight: bold; font-size: 1rem; 
             margin-top: 5px; box-shadow: 0 4px 0px #E57373;
         }
-        .save-btn:active { transform: translateY(3px); box-shadow: none; }
 
-        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 5px; border-bottom: 1px dashed var(--accent); }
-        .item-title { font-size: 0.95rem; font-weight: bold; }
-        .item-sub { font-size: 0.7rem; color: #BBB; margin-top: 2px; }
+        /* 歷史清單：修改為可編輯風格 */
+        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 5px; border-bottom: 1px dashed var(--accent); }
+        .edit-input { 
+            border: none; background: transparent; padding: 0; font-size: 0.95rem; 
+            font-weight: bold; color: var(--text); width: 100%;
+        }
+        .edit-input:focus { outline: none; background: #FFF9E1; }
+        .edit-loc { font-size: 0.75rem; color: #BBB; border: none; background: transparent; width: 100%; }
+        .edit-time { border: none; background: transparent; font-size: 0.7rem; color: #CCC; width: 100%; }
+
         .item-price { font-size: 1rem; font-weight: 900; color: var(--primary); }
         .item-original { font-size: 0.7rem; color: #CCC; }
-        
         .del-btn { background: #FFF0F0; border: none; color: var(--primary); border-radius: 50%; width: 28px; height: 28px; margin-left: 10px; font-size: 0.8rem; }
 
+        /* 累積花費欄位再收窄 */
         .total-bar { 
             position: fixed; bottom: 0; left: 0; width: 100%; background: var(--white); 
-            padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; 
+            padding: 8px 20px; display: flex; justify-content: space-between; align-items: center; 
             border-top: 2px solid var(--accent); border-radius: 20px 20px 0 0; z-index: 1000;
         }
-        .total-amount { font-size: 1.3rem; font-weight: 900; color: var(--primary); }
+        .total-amount { font-size: 1.2rem; font-weight: 900; color: var(--primary); }
     </style>
 </head>
 <body>
@@ -118,15 +118,14 @@
     <div id="historyList"></div>
 
     <div class="total-bar">
-        <span style="font-weight: bold; color: #AAA; font-size: 0.85rem;">累積花費</span>
+        <span style="font-weight: bold; color: #AAA; font-size: 0.8rem;">累積花費</span>
         <span id="totalSum" class="total-amount">0</span>
     </div>
 
     <script>
-        let history = JSON.parse(localStorage.getItem('ex_cute_v3') || '[]');
+        let history = JSON.parse(localStorage.getItem('ex_cute_v4') || '[]');
         let currentCurrency = localStorage.getItem('last_curr') || 'JPY';
         
-        // 初始化
         document.getElementById('locName').value = localStorage.getItem('last_loc') || '';
         document.getElementById('currencySelect').value = currentCurrency;
         document.getElementById('currLabel').innerText = currentCurrency;
@@ -147,15 +146,11 @@
 
         function changeCurrBySelect() {
             const select = document.getElementById('currencySelect');
-            const name = select.value;
-            const defaultRate = select.options[select.selectedIndex].getAttribute('data-rate');
-            
-            currentCurrency = name;
-            localStorage.setItem('last_curr', name);
-            document.getElementById('currLabel').innerText = name;
-            
-            const r = localStorage.getItem('manual_rate_' + name);
-            document.getElementById('rate').value = r || defaultRate;
+            currentCurrency = select.value;
+            localStorage.setItem('last_curr', currentCurrency);
+            document.getElementById('currLabel').innerText = currentCurrency;
+            const r = localStorage.getItem('manual_rate_' + currentCurrency);
+            document.getElementById('rate').value = r || select.options[select.selectedIndex].getAttribute('data-rate');
             calculate();
         }
 
@@ -185,20 +180,31 @@
                 loc: loc
             };
             history.unshift(record);
-            localStorage.setItem('ex_cute_v3', JSON.stringify(history));
-            localStorage.setItem('last_loc', loc);
-            render();
+            syncData();
             document.getElementById('note').value = '';
             document.getElementById('foreign').value = '';
             document.getElementById('twd').value = '';
         }
 
+        // 修改現有紀錄的函數
+        function updateRecord(id, field, value) {
+            const index = history.findIndex(h => h.id === id);
+            if (index !== -1) {
+                history[index][field] = value;
+                syncData();
+            }
+        }
+
         function deleteItem(id) {
             if (confirm("確定刪除嗎？")) {
                 history = history.filter(h => h.id !== id);
-                localStorage.setItem('ex_cute_v3', JSON.stringify(history));
-                render();
+                syncData();
             }
+        }
+
+        function syncData() {
+            localStorage.setItem('ex_cute_v4', JSON.stringify(history));
+            render();
         }
 
         function render() {
@@ -206,13 +212,13 @@
             let sum = 0;
             list.innerHTML = history.map(h => {
                 sum += parseInt(h.t);
-                // 修正：如果沒有地點，則不顯示地點文字與標籤
-                const locInfo = h.loc ? `<span style="font-size:0.7rem; color:#CCC; font-weight:normal;"> @ ${h.loc}</span>` : '';
+                // 邏輯修正：如果沒有地點且非編輯狀態，本來不顯示，但為了讓你可以事後「補填」，我們顯示一個透明的輸入框
                 return `
                     <div class="history-item">
                         <div style="flex:1">
-                            <div class="item-title">${h.note}${locInfo}</div>
-                            <div class="item-sub">${h.time.replace('T', ' ')}</div>
+                            <input class="edit-input" value="${h.note}" onchange="updateRecord(${h.id}, 'note', this.value)">
+                            ${h.loc || h.note === h.note ? `<input class="edit-loc" value="${h.loc}" placeholder="+ 新增地點" onchange="updateRecord(${h.id}, 'loc', this.value)">` : ''}
+                            <input type="datetime-local" class="edit-time" value="${h.time}" onchange="updateRecord(${h.id}, 'time', this.value)">
                         </div>
                         <div style="text-align:right">
                             <div class="item-price">$${parseInt(h.t).toLocaleString()}</div>
