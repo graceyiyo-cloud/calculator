@@ -16,7 +16,7 @@
             --text: #5D5D5D; --accent: #FFD3B6; --white: #FFFFFF;
         }
 
-        * { box-sizing: border-box; font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; }
+        * { box-sizing: border-box; font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--bg); color: var(--text); margin: 0; padding: 10px 15px 80px 15px; overflow-x: hidden; }
 
         .app-header { font-size: 1.3rem; font-weight: 900; margin: 10px 0; color: var(--primary); text-align: center; }
@@ -33,7 +33,10 @@
             width: 100%; padding: 10px; border: 2px solid #F5F5F5; 
             border-radius: 12px; font-size: 1rem; color: var(--text); background: #FAFAFA;
             -webkit-appearance: none;
+            outline: none; transition: border-color 0.2s;
         }
+
+        .active-input { border-color: var(--primary) !important; background: #FFF !important; box-shadow: inset 0 0 4px rgba(255,140,148,0.2); }
 
         .flex-row { display: flex; align-items: center; gap: 8px; }
 
@@ -43,7 +46,6 @@
             font-size: 1.1rem; cursor: pointer; flex-shrink: 0;
         }
         .refresh-btn { background: var(--secondary); box-shadow: 0 3px 0px #8DD3B8; }
-        .clear-input-btn { background: #EEE; color: #999; box-shadow: 0 3px 0px #DDD; font-size: 1.3rem; }
         .side-btn:active { transform: translateY(2px); box-shadow: none; }
 
         .save-btn { 
@@ -53,29 +55,52 @@
         }
         .save-btn:active { transform: translateY(3px); box-shadow: none; }
 
-        /* 歷史紀錄區塊標題 */
+        /* 迷你計算機介面 - 縮小且回歸可愛配色 */
+        .calc-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            margin: 10px 0 15px 0;
+            background: #FDFBF0; /* 溫暖奶茶色底 */
+            padding: 10px;
+            border-radius: 20px;
+            border: 1px solid var(--accent);
+        }
+        .calc-btn {
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .calc-btn:active { transform: translateY(2px); box-shadow: none !important; }
+        
+        /* 可愛配色分類 */
+        .btn-num { background: var(--white); color: var(--text); box-shadow: 0 2px 0px #DDD; }
+        .btn-op { background: var(--primary); color: white; box-shadow: 0 2px 0px #E57373; }
+        .btn-top { background: var(--secondary); color: var(--text); box-shadow: 0 2px 0px #8DD3B8; }
+        .btn-zero { grid-column: span 2; justify-content: center; }
+
+        /* 歷史紀錄相關 */
         .history-header { display: flex; justify-content: space-between; align-items: center; margin: 20px 5px 10px 5px; }
         .history-title { font-size: 1rem; font-weight: bold; color: #AAA; }
         .clear-all-btn { background: transparent; border: 1px solid #CCC; color: #AAA; padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; }
-
-        /* 歷史紀錄項目的按鈕前置 */
         .history-item { padding: 12px 5px; border-bottom: 1px dashed var(--accent); }
         .item-main { display: flex; align-items: flex-start; gap: 10px; }
         .action-group { display: flex; gap: 5px; flex-shrink: 0; }
-        .icon-btn { 
-            width: 28px; height: 28px; border-radius: 8px; border: none; 
-            display: flex; align-items: center; justify-content: center; font-size: 0.85rem;
-        }
+        .icon-btn { width: 28px; height: 28px; border-radius: 8px; border: none; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; }
         .btn-edit-icon { background: #E1F5FE; color: #03A9F4; }
         .btn-del-icon { background: #FFF0F0; color: var(--primary); }
-
         .item-info { flex: 1; min-width: 0; }
         .item-title { font-size: 0.95rem; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .item-sub { font-size: 0.7rem; color: #BBB; margin-top: 2px; }
         .item-price-group { text-align: right; flex-shrink: 0; }
         .item-price { font-size: 1.05rem; font-weight: 900; color: var(--primary); }
         .item-original { font-size: 0.7rem; color: #CCC; }
-
         .edit-mode input { margin-bottom: 6px; padding: 6px; font-size: 0.85rem; border: 1px solid var(--accent); border-radius: 8px; }
 
         .total-bar { 
@@ -109,15 +134,38 @@
 
         <div class="input-group">
             <label>金額 (<span id="currLabel">JPY</span>)</label>
-            <div class="flex-row">
-                <input type="number" id="foreign" placeholder="0" oninput="calculate()" style="flex: 1;">
-                <button class="side-btn clear-input-btn" onclick="resetForm()">✕</button>
-            </div>
+            <input type="text" id="foreign" placeholder="0" class="active-input" readonly>
         </div>
 
         <div class="input-group">
-            <label>折合台幣 (TWD) - 亦可反推</label>
-            <input type="number" id="twd" placeholder="0" oninput="calculateReverse()">
+            <label>折合台幣 (TWD)</label>
+            <input type="text" id="twd" placeholder="0" readonly>
+        </div>
+
+        <div class="calc-container">
+            <div class="calc-btn btn-top" onclick="clearActiveInput()">C</div>
+            <div class="calc-btn btn-top" onclick="backspace()">←</div>
+            <div class="calc-btn btn-top" onclick="inputNum('%')">%</div>
+            <div class="calc-btn btn-op" onclick="inputNum('/')">÷</div>
+            
+            <div class="calc-btn btn-num" onclick="inputNum('7')">7</div>
+            <div class="calc-btn btn-num" onclick="inputNum('8')">8</div>
+            <div class="calc-btn btn-num" onclick="inputNum('9')">9</div>
+            <div class="calc-btn btn-op" onclick="inputNum('*')">×</div>
+            
+            <div class="calc-btn btn-num" onclick="inputNum('4')">4</div>
+            <div class="calc-btn btn-num" onclick="inputNum('5')">5</div>
+            <div class="calc-btn btn-num" onclick="inputNum('6')">6</div>
+            <div class="calc-btn btn-op" onclick="inputNum('-')">−</div>
+            
+            <div class="calc-btn btn-num" onclick="inputNum('1')">1</div>
+            <div class="calc-btn btn-num" onclick="inputNum('2')">2</div>
+            <div class="calc-btn btn-num" onclick="inputNum('3')">3</div>
+            <div class="calc-btn btn-op" onclick="inputNum('+')">+</div>
+            
+            <div class="calc-btn btn-num btn-zero" onclick="inputNum('0')">0</div>
+            <div class="calc-btn btn-num" onclick="inputNum('.')">.</div>
+            <div class="calc-btn btn-op" onclick="evaluateCalc()">=</div>
         </div>
 
         <div class="flex-row" style="margin-bottom: 10px;">
@@ -145,6 +193,7 @@
         let history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
         let currentCurrency = localStorage.getItem('last_curr') || 'JPY';
         let editingId = null;
+        let activeInputId = 'foreign';
 
         document.getElementById('locName').value = localStorage.getItem('last_loc') || '';
         document.getElementById('currencySelect').value = currentCurrency;
@@ -152,24 +201,69 @@
         const savedRate = localStorage.getItem('manual_rate_' + currentCurrency);
         document.getElementById('rate').value = savedRate || 0.1977;
 
+        window.onload = function() {
+            const fInput = document.getElementById('foreign');
+            const tInput = document.getElementById('twd');
+            fInput.addEventListener('click', () => {
+                activeInputId = 'foreign';
+                fInput.classList.add('active-input');
+                tInput.classList.remove('active-input');
+            });
+            tInput.addEventListener('click', () => {
+                activeInputId = 'twd';
+                tInput.classList.add('active-input');
+                fInput.classList.remove('active-input');
+            });
+        }
+
+        function inputNum(n) {
+            const target = document.getElementById(activeInputId);
+            if (n === '%' ) { evaluateCalc(); return; }
+            target.value += n;
+            syncCalculate();
+        }
+
+        function backspace() {
+            const target = document.getElementById(activeInputId);
+            target.value = target.value.slice(0, -1);
+            syncCalculate();
+        }
+
+        function clearActiveInput() {
+            document.getElementById(activeInputId).value = '';
+            syncCalculate();
+        }
+
+        function evaluateCalc() {
+            const target = document.getElementById(activeInputId);
+            try {
+                let result = new Function('return ' + target.value.replace(/[^0-9+\-*/.]/g, ''))();
+                target.value = result ? parseFloat(result.toFixed(2)) : '';
+                syncCalculate();
+            } catch (e) {}
+        }
+
+        function syncCalculate() {
+            if (activeInputId === 'foreign') calculate();
+            else calculateReverse();
+        }
+
         function calculate() {
             const r = document.getElementById('rate').value || 0;
-            const f = document.getElementById('foreign').value || 0;
-            document.getElementById('twd').value = f > 0 ? Math.round(r * f) : "";
+            const fStr = document.getElementById('foreign').value;
+            try {
+                const f = new Function('return ' + fStr.replace(/[^0-9+\-*/.]/g, ''))() || 0;
+                document.getElementById('twd').value = f > 0 ? Math.round(r * f) : "";
+            } catch(e) {}
         }
 
         function calculateReverse() {
             const r = document.getElementById('rate').value || 0;
-            const t = document.getElementById('twd').value || 0;
-            if (r > 0) document.getElementById('foreign').value = t > 0 ? (t / r).toFixed(2) : "";
-        }
-
-        function resetForm() {
-            document.getElementById('note').value = '';
-            document.getElementById('foreign').value = '';
-            document.getElementById('twd').value = '';
-            document.getElementById('locName').value = '';
-            localStorage.removeItem('last_loc');
+            const tStr = document.getElementById('twd').value;
+            try {
+                const t = new Function('return ' + tStr.replace(/[^0-9+\-*/.]/g, ''))() || 0;
+                if (r > 0) document.getElementById('foreign').value = t > 0 ? Math.round(t / r) : "";
+            } catch(e) {}
         }
 
         function manualRateInput() {
@@ -202,6 +296,7 @@
         }
 
         function save() {
+            evaluateCalc();
             const fAmount = document.getElementById('foreign').value;
             if (!fAmount) return;
             const record = {
@@ -210,7 +305,7 @@
                 f: fAmount,
                 rate: document.getElementById('rate').value,
                 curr: currentCurrency,
-                t: document.getElementById('twd').value || Math.round(document.getElementById('rate').value * fAmount),
+                t: document.getElementById('twd').value,
                 time: new Date().toISOString().slice(0, 16),
                 loc: document.getElementById('locName').value
             };
@@ -261,9 +356,9 @@
                 sum += parseInt(h.t);
                 if (editingId === h.id) {
                     return `<div class="history-item edit-mode">
-                        <input type="text" id="edit-note-${h.id}" value="${h.note}">
-                        <input type="text" id="edit-loc-${h.id}" value="${h.loc}" placeholder="補填地點">
-                        <input type="number" id="edit-f-${h.id}" value="${h.f}">
+                        <input type="text" id="edit-note-${h.id}" value="${h.note}" placeholder="請輸入備註/品名">
+                        <input type="text" id="edit-loc-${h.id}" value="${h.loc}" placeholder="請輸入地點">
+                        <input type="number" id="edit-f-${h.id}" value="${h.f}" step="any" placeholder="請輸入金額">
                         <input type="datetime-local" id="edit-time-${h.id}" value="${h.time}">
                         <div style="display:flex; gap:5px; margin-top:5px;">
                             <button class="mini-btn" style="background:var(--secondary); border:none; padding:5px 10px; border-radius:5px;" onclick="saveEdit(${h.id})">存</button>
@@ -282,14 +377,14 @@
                                 <div class="item-sub">${h.time.replace('T', ' ')}</div>
                             </div>
                             <div class="item-price-group">
-                                <div class="item-price">$${parseInt(h.t).toLocaleString()}</div>
-                                <div class="item-original">${h.f} ${h.curr}</div>
+                                <div class="item-price">NTD ${parseInt(h.t).toLocaleString()}</div>
+                                <div class="item-original">${h.curr} ${h.f}</div>
                             </div>
                         </div>
                     </div>`;
                 }
             }).join('');
-            document.getElementById('totalSum').innerText = `TWD $${sum.toLocaleString()}`;
+            document.getElementById('totalSum').innerText = `NTD ${sum.toLocaleString()}`;
         }
         render();
     </script>
