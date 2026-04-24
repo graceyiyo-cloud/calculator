@@ -35,43 +35,39 @@
             -webkit-appearance: none;
         }
 
-        /* 匯率與按鈕平行方案 */
-        .flex-container { display: flex; align-items: center; gap: 8px; }
-        .refresh-btn { 
-            background: var(--secondary); border: none; border-radius: 10px; 
-            width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center;
-            font-size: 1.2rem; cursor: pointer; box-shadow: 0 3px 0px #8DD3B8; flex-shrink: 0;
-        }
-        .refresh-btn:active { transform: translateY(2px); box-shadow: none; }
+        /* 統一的平行容器 */
+        .flex-row { display: flex; align-items: center; gap: 8px; }
 
-        /* 底部功能按鈕 */
-        .action-btns { display: flex; gap: 10px; margin-top: 10px; }
-        .clear-btn { 
-            flex: 1; background: #EEE; color: #999; border: none; 
-            padding: 12px; border-radius: 15px; font-weight: bold; font-size: 0.9rem;
-            box-shadow: 0 4px 0px #DDD;
+        /* 輔助按鈕樣式 (重整、清空) */
+        .side-btn { 
+            border: none; border-radius: 12px; 
+            width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; cursor: pointer; flex-shrink: 0;
         }
+        .refresh-btn { background: var(--secondary); box-shadow: 0 3px 0px #8DD3B8; }
+        .clear-input-btn { background: #EEE; color: #999; box-shadow: 0 3px 0px #DDD; font-size: 1.3rem; }
+        
+        .side-btn:active { transform: translateY(2px); box-shadow: none; }
+
+        /* 儲存按鈕：改為滿版 */
         .save-btn { 
-            flex: 2; background: var(--primary); color: white; border: none; 
-            padding: 12px; border-radius: 15px; font-weight: bold; font-size: 1rem; 
-            box-shadow: 0 4px 0px #E57373;
+            width: 100%; background: var(--primary); color: white; border: none; 
+            padding: 14px; border-radius: 15px; font-weight: bold; font-size: 1.1rem; 
+            box-shadow: 0 4px 0px #E57373; margin-top: 5px;
         }
-        .clear-btn:active, .save-btn:active { transform: translateY(3px); box-shadow: none; }
+        .save-btn:active { transform: translateY(3px); box-shadow: none; }
 
         /* 歷史清單 */
         .history-item { padding: 12px 5px; border-bottom: 1px dashed var(--accent); }
-        .display-mode .item-title { font-size: 0.95rem; font-weight: bold; }
-        .display-mode .item-sub { font-size: 0.75rem; color: #BBB; margin-top: 2px; }
-        .display-mode .item-price { font-size: 1rem; font-weight: 900; color: var(--primary); }
+        .item-title { font-size: 0.95rem; font-weight: bold; }
+        .item-sub { font-size: 0.75rem; color: #BBB; margin-top: 2px; }
+        .item-price { font-size: 1.1rem; font-weight: 900; color: var(--primary); }
         
-        .edit-mode input { margin-bottom: 5px; padding: 5px 8px; font-size: 0.85rem; border: 1px solid var(--accent); }
-        .edit-actions { display: flex; gap: 5px; margin-top: 5px; }
+        /* 編輯模式 */
+        .edit-mode input { margin-bottom: 5px; padding: 6px; font-size: 0.85rem; border: 1px solid var(--accent); }
         .mini-btn { padding: 5px 12px; border-radius: 8px; border: none; font-size: 0.75rem; font-weight: bold; }
-
         .btn-edit { background: #E1F5FE; color: #03A9F4; margin-right: 5px; }
         .btn-del { background: #FFF0F0; color: var(--primary); }
-        .btn-save { background: var(--secondary); color: #555; }
-        .btn-cancel { background: #EEE; color: #999; }
 
         .total-bar { 
             position: fixed; bottom: 0; left: 0; width: 100%; background: var(--white); 
@@ -96,31 +92,31 @@
 
         <div class="input-group">
             <label>手動匯率</label>
-            <div class="flex-container">
+            <div class="flex-row">
                 <input type="number" id="rate" step="0.0001" oninput="manualRateInput()" style="flex: 1;">
-                <button class="refresh-btn" onclick="fetchRate()">🔄</button>
+                <button class="side-btn refresh-btn" onclick="fetchRate()">🔄</button>
             </div>
         </div>
 
         <div class="input-group">
-            <label>外幣金額 (<span id="currLabel">JPY</span>)</label>
-            <input type="number" id="foreign" placeholder="0" oninput="calculate()">
+            <label>金額 (<span id="currLabel">JPY</span>)</label>
+            <div class="flex-row">
+                <input type="number" id="foreign" placeholder="0" oninput="calculate()" style="flex: 1;">
+                <button class="side-btn clear-input-btn" onclick="resetForm()" title="清空全部">✕</button>
+            </div>
         </div>
 
         <div class="input-group">
-            <label>換算台幣 (TWD) - 亦可輸入反推</label>
+            <label>折合台幣 (TWD) - 亦可輸入反推</label>
             <input type="number" id="twd" placeholder="0" oninput="calculateReverse()">
         </div>
 
-        <div class="flex-container" style="margin-bottom: 10px;">
-            <div style="flex: 1;"><label>品名</label><input type="text" id="note" placeholder="買了什麼？"></div>
+        <div class="flex-row" style="margin-bottom: 10px;">
+            <div style="flex: 1;"><label>品名</label><input type="text" id="note" placeholder="買什麼？"></div>
             <div style="flex: 1;"><label>地點</label><input type="text" id="locName" placeholder="哪家店？"></div>
         </div>
 
-        <div class="action-btns">
-            <button class="clear-btn" onclick="resetForm()">全部清空</button>
-            <button class="save-btn" onclick="save()">把這筆記下來！ ✍️</button>
-        </div>
+        <button class="save-btn" onclick="save()">把這筆記下來！ ✍️</button>
     </div>
 
     <div id="historyList"></div>
@@ -136,37 +132,33 @@
         let currentCurrency = localStorage.getItem('last_curr') || 'JPY';
         let editingId = null;
 
-        // 初始化
+        // 初始化設定
         document.getElementById('locName').value = localStorage.getItem('last_loc') || '';
         document.getElementById('currencySelect').value = currentCurrency;
         document.getElementById('currLabel').innerText = currentCurrency;
         const savedRate = localStorage.getItem('manual_rate_' + currentCurrency);
         document.getElementById('rate').value = savedRate || 0.1977;
 
-        // 1. 正向換算 (外幣 -> 台幣)
         function calculate() {
             const r = document.getElementById('rate').value || 0;
             const f = document.getElementById('foreign').value || 0;
-            document.getElementById('twd').value = Math.round(r * f) || "";
+            document.getElementById('twd').value = f > 0 ? Math.round(r * f) : "";
         }
 
-        // 2. 反向換算 (台幣 -> 外幣)
         function calculateReverse() {
             const r = document.getElementById('rate').value || 0;
             const t = document.getElementById('twd').value || 0;
             if (r > 0) {
-                // 回推外幣，取小數點兩位比較精確
-                document.getElementById('foreign').value = (t / r).toFixed(2);
+                document.getElementById('foreign').value = t > 0 ? (t / r).toFixed(2) : "";
             }
         }
 
-        // 3. 清空輸入框
         function resetForm() {
             document.getElementById('note').value = '';
             document.getElementById('foreign').value = '';
             document.getElementById('twd').value = '';
             document.getElementById('locName').value = '';
-            localStorage.removeItem('last_loc'); // 連地點一起重設
+            localStorage.removeItem('last_loc');
         }
 
         function manualRateInput() {
@@ -207,13 +199,12 @@
                 f: fAmount,
                 rate: document.getElementById('rate').value,
                 curr: currentCurrency,
-                t: document.getElementById('twd').value,
+                t: document.getElementById('twd').value || Math.round(document.getElementById('rate').value * fAmount),
                 time: new Date().toISOString().slice(0, 16),
                 loc: document.getElementById('locName').value
             };
             history.unshift(record);
             syncData();
-            // 儲存後只清空品名與金額，保留地點以便下一筆記錄（符合旅遊習慣）
             document.getElementById('note').value = '';
             document.getElementById('foreign').value = '';
             document.getElementById('twd').value = '';
@@ -256,13 +247,13 @@
                         <label>地點</label><input type="text" id="edit-loc-${h.id}" value="${h.loc}">
                         <label>金額 (${h.curr})</label><input type="number" id="edit-f-${h.id}" value="${h.f}">
                         <label>時間</label><input type="datetime-local" id="edit-time-${h.id}" value="${h.time}">
-                        <div class="edit-actions">
-                            <button class="mini-btn btn-save" onclick="saveEdit(${h.id})">確認</button>
-                            <button class="mini-btn btn-cancel" onclick="toggleEdit(null)">取消</button>
+                        <div style="display:flex; gap:5px; margin-top:5px;">
+                            <button class="mini-btn" style="background:var(--secondary)" onclick="saveEdit(${h.id})">確認</button>
+                            <button class="mini-btn" style="background:#EEE" onclick="toggleEdit(null)">取消</button>
                         </div>
                     </div>`;
                 } else {
-                    return `<div class="history-item display-mode">
+                    return `<div class="history-item">
                         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                             <div style="flex:1">
                                 <div class="item-title">${h.note}${h.loc ? `<span style="font-size:0.7rem; color:#CCC; font-weight:normal;"> @ ${h.loc}</span>` : ''}</div>
@@ -274,7 +265,7 @@
                             </div>
                             <div style="text-align:right">
                                 <div class="item-price">$${parseInt(h.t).toLocaleString()}</div>
-                                <div style="font-size:0.7rem; color:#CCC">${h.f} ${h.curr}</div>
+                                <div style="font-size:0.75rem; color:#CCC">${h.f} ${h.curr}</div>
                             </div>
                         </div>
                     </div>`;
