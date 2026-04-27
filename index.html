@@ -12,58 +12,72 @@
     
     <style>
         :root { 
-            --bg: #FFF9E1; --primary: #FF8C94; --secondary: #A8E6CF; 
-            --text: #5D5D5D; --accent: #FFD3B6; --white: #FFFFFF;
+            --bg: #F4F8F9; /* 輕柔海風藍白 */
+            --primary: #48A9A6; /* 渡假海洋藍綠 */
+            --secondary: #FFD166; /* 陽光沙灘黃 */
+            --text: #424B4B; /* 柔和深灰 */
+            --accent: #D4E4E1; /* 邊框柔和色 */
+            --white: #FFFFFF;
         }
 
+        html { font-size: 110%; }
+
         * { box-sizing: border-box; font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--bg); color: var(--text); margin: 0; padding: 10px 15px 80px 15px; overflow-x: hidden; }
+        /* 縮減左右邊距讓整體離邊界更近 */
+        body { background-color: var(--bg); color: var(--text); margin: 0; padding: 5px 8px 80px 8px; overflow-x: hidden; }
 
         .app-header { font-size: 1.3rem; font-weight: 900; margin: 10px 0; color: var(--primary); text-align: center; }
 
+        /* 縮減卡片內距 */
         .card { 
-            background: var(--white); padding: 15px; border-radius: 20px; 
-            box-shadow: 0 5px 0px var(--accent); margin-bottom: 15px; border: 2px solid var(--accent);
+            background: var(--white); padding: 10px; border-radius: 8px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid var(--accent);
         }
 
         .input-group { margin-bottom: 10px; }
-        label { display: block; font-size: 0.8rem; margin-bottom: 4px; font-weight: bold; color: #AAA; }
+        label { display: block; font-size: 0.8rem; margin-bottom: 4px; font-weight: bold; color: #7A8B8B; }
         
         input, select { 
-            width: 100%; padding: 10px; border: 2px solid #F5F5F5; 
-            border-radius: 12px; font-size: 1rem; color: var(--text); background: #FAFAFA;
+            width: 100%; padding: 10px; border: 1px solid var(--accent); 
+            border-radius: 6px; font-size: 1rem; color: var(--text); background: #FAFCFC;
             -webkit-appearance: none;
-            outline: none; transition: border-color 0.2s;
+            outline: none; transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
         }
 
-        .active-input { border-color: var(--primary) !important; background: #FFF !important; box-shadow: inset 0 0 4px rgba(255,140,148,0.2); }
+        /* 外幣專屬配色 (海洋藍綠) */
+        #foreign { color: var(--primary); background: #EAF5F5; }
+        .active-input { border-color: var(--primary) !important; background: #FFF !important; box-shadow: inset 0 0 4px rgba(72,169,166,0.2) !important; }
+
+        /* 台幣專屬配色 (日落陶土橘) */
+        #twd { color: #E07A5F; background: #FDF5F2; border-color: #F4D5C9; }
+        .active-input-twd { border-color: #E07A5F !important; background: #FFF !important; box-shadow: inset 0 0 4px rgba(224,122,95,0.2) !important; }
 
         .flex-row { display: flex; align-items: center; gap: 8px; }
 
         .side-btn { 
-            border: none; border-radius: 12px; 
+            border: none; border-radius: 6px; 
             width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center;
             font-size: 1.1rem; cursor: pointer; flex-shrink: 0;
         }
-        .refresh-btn { background: var(--secondary); box-shadow: 0 3px 0px #8DD3B8; }
+        .refresh-btn { background: var(--secondary); box-shadow: 0 3px 0px #E5B443; }
         .side-btn:active { transform: translateY(2px); box-shadow: none; }
 
         .save-btn { 
             width: 100%; background: var(--primary); color: white; border: none; 
-            padding: 14px; border-radius: 15px; font-weight: bold; font-size: 1.1rem; 
-            box-shadow: 0 4px 0px #E57373; margin-top: 5px;
+            padding: 14px; border-radius: 8px; font-weight: bold; font-size: 1.1rem; 
+            box-shadow: 0 4px 0px #358582; margin-top: 5px;
         }
         .save-btn:active { transform: translateY(3px); box-shadow: none; }
 
-        /* 迷你計算機介面 - 縮小且回歸可愛配色 */
+        /* 迷你計算機介面 - 旅行輕鬆風格 */
         .calc-container {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 6px;
             margin: 10px 0 15px 0;
-            background: #FDFBF0; /* 溫暖奶茶色底 */
+            background: #FAFDFC; 
             padding: 10px;
-            border-radius: 20px;
+            border-radius: 8px;
             border: 1px solid var(--accent);
         }
         .calc-btn {
@@ -71,42 +85,44 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 12px;
+            border-radius: 6px;
             font-weight: 800;
-            font-size: 1rem;
+            font-size: 1.3rem; /* 加大計算機數字與按鈕字體 */
             cursor: pointer;
             transition: transform 0.1s;
+            border: 1px solid rgba(0, 0, 0, 0.15);
         }
         .calc-btn:active { transform: translateY(2px); box-shadow: none !important; }
         
-        /* 可愛配色分類 */
-        .btn-num { background: var(--white); color: var(--text); box-shadow: 0 2px 0px #DDD; }
-        .btn-op { background: var(--primary); color: white; box-shadow: 0 2px 0px #E57373; }
-        .btn-top { background: var(--secondary); color: var(--text); box-shadow: 0 2px 0px #8DD3B8; }
+        /* 輕鬆配色分類 */
+        .btn-num { background: var(--white); color: var(--text); box-shadow: 0 2px 0px var(--accent); }
+        .btn-op { background: var(--primary); color: white; box-shadow: 0 2px 0px #358582; }
+        .btn-top { background: var(--secondary); color: var(--text); box-shadow: 0 2px 0px #E5B443; }
         .btn-zero { grid-column: span 2; justify-content: center; }
 
-        /* 歷史紀錄相關 */
-        .history-header { display: flex; justify-content: space-between; align-items: center; margin: 20px 5px 10px 5px; }
-        .history-title { font-size: 1rem; font-weight: bold; color: #AAA; }
-        .clear-all-btn { background: transparent; border: 1px solid #CCC; color: #AAA; padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; }
-        .history-item { padding: 12px 5px; border-bottom: 1px dashed var(--accent); }
+        /* 歷史紀錄相關：配合邊界縮減左右邊距 */
+        .history-header { display: flex; justify-content: space-between; align-items: center; margin: 15px 0 10px 0; }
+        .history-title { font-size: 1rem; font-weight: bold; color: #7A8B8B; }
+        .clear-all-btn { background: transparent; border: 1px solid #B0C4C4; color: #7A8B8B; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; }
+        .history-item { padding: 12px 0; border-bottom: 1px dashed var(--accent); }
         .item-main { display: flex; align-items: flex-start; gap: 10px; }
         .action-group { display: flex; gap: 5px; flex-shrink: 0; }
-        .icon-btn { width: 28px; height: 28px; border-radius: 8px; border: none; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; }
-        .btn-edit-icon { background: #E1F5FE; color: #03A9F4; }
-        .btn-del-icon { background: #FFF0F0; color: var(--primary); }
+        .icon-btn { width: 28px; height: 28px; border-radius: 4px; border: none; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; }
+        .btn-edit-icon { background: #FFF8E7; color: #D4A373; }
+        .btn-del-icon { background: #FDF5F2; color: #E07A5F; }
         .item-info { flex: 1; min-width: 0; }
         .item-title { font-size: 0.95rem; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .item-sub { font-size: 0.7rem; color: #BBB; margin-top: 2px; }
+        .item-sub { font-size: 0.7rem; color: #A4B5B5; margin-top: 2px; }
         .item-price-group { text-align: right; flex-shrink: 0; }
         .item-price { font-size: 1.05rem; font-weight: 900; color: var(--primary); }
-        .item-original { font-size: 0.7rem; color: #CCC; }
-        .edit-mode input { margin-bottom: 6px; padding: 6px; font-size: 0.85rem; border: 1px solid var(--accent); border-radius: 8px; }
+        .item-original { font-size: 0.7rem; color: #A4B5B5; }
+        .edit-mode input { margin-bottom: 6px; padding: 6px; font-size: 0.85rem; border: 1px solid var(--accent); border-radius: 4px; }
 
         .total-bar { 
             position: fixed; bottom: 0; left: 0; width: 100%; background: var(--white); 
             padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; 
-            border-top: 2px solid var(--accent); border-radius: 20px 20px 0 0; z-index: 1000;
+            border-top: 1px solid var(--accent); border-radius: 12px 12px 0 0; z-index: 1000;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
         }
     </style>
 </head>
@@ -115,36 +131,38 @@
     <div class="app-header">✈️ 換匯計算機</div>
 
     <div class="card">
-        <div class="input-group">
-            <label>選擇幣別</label>
-            <select id="currencySelect" onchange="changeCurrBySelect()">
-                <option value="JPY" data-rate="0.1977">日圓 JPY</option>
-                <option value="USD" data-rate="32.5">美金 USD</option>
-                <option value="KRW" data-rate="0.024">韓元 KRW</option>
-                <option value="HKD" data-rate="4.15">港幣 HKD</option>
-                <option value="THB" data-rate="0.91">泰銖 THB</option>
-                <option value="EUR" data-rate="35.5">歐元 EUR</option>
-                <option value="AUD" data-rate="21.5">澳幣 AUD</option>
-                <option value="GBP" data-rate="41.5">英鎊 GBP</option>
-            </select>
-        </div>
+        <div class="flex-row" style="align-items: flex-end; margin-bottom: 10px; gap: 8px;">
+            <div class="input-group" style="flex: 1; margin-bottom: 0;">
+                <label>選擇幣別</label>
+                <select id="currencySelect" onchange="changeCurrBySelect()">
+                    <option value="JPY" data-rate="0.1977">日圓 JPY</option>
+                    <option value="USD" data-rate="32.5">美金 USD</option>
+                    <option value="KRW" data-rate="0.024">韓元 KRW</option>
+                    <option value="HKD" data-rate="4.15">港幣 HKD</option>
+                    <option value="THB" data-rate="0.91">泰銖 THB</option>
+                    <option value="EUR" data-rate="35.5">歐元 EUR</option>
+                    <option value="AUD" data-rate="21.5">澳幣 AUD</option>
+                    <option value="GBP" data-rate="41.5">英鎊 GBP</option>
+                </select>
+            </div>
 
-        <div class="input-group">
-            <label>手動匯率</label>
-            <div class="flex-row">
-                <input type="number" id="rate" step="0.0001" oninput="manualRateInput()" style="flex: 1;">
-                <button class="side-btn refresh-btn" onclick="fetchRate()">🔄</button>
+            <div class="input-group" style="flex: 1; margin-bottom: 0;">
+                <label>手動匯率</label>
+                <div class="flex-row">
+                    <input type="number" id="rate" step="0.0001" oninput="manualRateInput()" style="flex: 1;">
+                    <button class="side-btn refresh-btn" onclick="fetchRate()">🔄</button>
+                </div>
             </div>
         </div>
 
         <div class="input-group">
             <label>金額 (<span id="currLabel">JPY</span>)</label>
-            <input type="text" id="foreign" placeholder="0" class="active-input" readonly>
+            <input type="text" id="foreign" placeholder="0" class="active-input" readonly style="font-size: 1.5rem; font-weight: bold;">
         </div>
 
         <div class="input-group">
             <label>折合台幣 (TWD)</label>
-            <input type="text" id="twd" placeholder="0" readonly>
+            <input type="text" id="twd" placeholder="0" readonly style="font-size: 1.5rem; font-weight: bold;">
         </div>
 
         <div class="calc-container">
@@ -189,7 +207,7 @@
     <div id="historyList"></div>
 
     <div class="total-bar">
-        <span style="font-weight: bold; color: #AAA; font-size: 0.85rem;">累積花費</span>
+        <span style="font-weight: bold; color: #7A8B8B; font-size: 0.85rem;">累積花費</span>
         <span id="totalSum" style="font-size: 1.3rem; font-weight: 900; color: var(--primary);">0</span>
     </div>
 
@@ -212,11 +230,11 @@
             fInput.addEventListener('click', () => {
                 activeInputId = 'foreign';
                 fInput.classList.add('active-input');
-                tInput.classList.remove('active-input');
+                tInput.classList.remove('active-input-twd');
             });
             tInput.addEventListener('click', () => {
                 activeInputId = 'twd';
-                tInput.classList.add('active-input');
+                tInput.classList.add('active-input-twd');
                 fInput.classList.remove('active-input');
             });
         }
@@ -378,7 +396,7 @@
                                 <button class="icon-btn btn-del-icon" onclick="deleteItem(${h.id})">✕</button>
                             </div>
                             <div class="item-info">
-                                <div class="item-title">${h.note}${h.loc ? `<span style="font-size:0.7rem; color:#CCC; font-weight:normal;"> @ ${h.loc}</span>` : ''}</div>
+                                <div class="item-title">${h.note}${h.loc ? `<span style="font-size:0.7rem; color:#A4B5B5; font-weight:normal;"> @ ${h.loc}</span>` : ''}</div>
                                 <div class="item-sub">${h.time.replace('T', ' ')}</div>
                             </div>
                             <div class="item-price-group">
