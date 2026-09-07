@@ -2,16 +2,21 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>換匯計算機</title>
-    
+    <meta name="theme-color" content="#48A9A6">
+    <meta name="description" content="隨身換匯、旅行記帳，安裝後可離線使用。">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="icon.png">
+    <script src="pwa.js" defer></script>
+
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="換匯計算機">
     <link rel="apple-touch-icon" href="icon.png">
-    
+
     <style>
-        :root { 
+        :root {
             --bg: #F4F8F9; /* 輕柔海風藍白 */
             --primary: #48A9A6; /* 渡假海洋藍綠 */
             --secondary: #FFD166; /* 陽光沙灘黃 */
@@ -29,16 +34,16 @@
         .app-header { font-size: 1.3rem; font-weight: 900; margin: 10px 0; color: var(--primary); text-align: center; }
 
         /* 縮減卡片內距 */
-        .card { 
-            background: var(--white); padding: 10px; border-radius: 8px; 
+        .card {
+            background: var(--white); padding: 10px; border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid var(--accent);
         }
 
         .input-group { margin-bottom: 10px; }
         label { display: block; font-size: 0.8rem; margin-bottom: 4px; font-weight: bold; color: #7A8B8B; }
-        
-        input, select { 
-            width: 100%; padding: 10px; border: 1px solid var(--accent); 
+
+        input, select {
+            width: 100%; padding: 10px; border: 1px solid var(--accent);
             border-radius: 6px; font-size: 1rem; color: var(--text); background: #FAFCFC;
             -webkit-appearance: none;
             outline: none; transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
@@ -54,17 +59,17 @@
 
         .flex-row { display: flex; align-items: center; gap: 8px; }
 
-        .side-btn { 
-            border: none; border-radius: 6px; 
+        .side-btn {
+            border: none; border-radius: 6px;
             width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center;
             font-size: 1.1rem; cursor: pointer; flex-shrink: 0;
         }
         .refresh-btn { background: var(--secondary); box-shadow: 0 3px 0px #E5B443; }
         .side-btn:active { transform: translateY(2px); box-shadow: none; }
 
-        .save-btn { 
-            width: 100%; background: var(--primary); color: white; border: none; 
-            padding: 14px; border-radius: 8px; font-weight: bold; font-size: 1.1rem; 
+        .save-btn {
+            width: 100%; background: var(--primary); color: white; border: none;
+            padding: 14px; border-radius: 8px; font-weight: bold; font-size: 1.1rem;
             box-shadow: 0 4px 0px #358582; margin-top: 5px;
         }
         .save-btn:active { transform: translateY(3px); box-shadow: none; }
@@ -75,7 +80,7 @@
             grid-template-columns: repeat(4, 1fr);
             gap: 6px;
             margin: 10px 0 15px 0;
-            background: #FAFDFC; 
+            background: #FAFDFC;
             padding: 10px;
             border-radius: 8px;
             border: 1px solid var(--accent);
@@ -93,7 +98,7 @@
             border: 1px solid rgba(0, 0, 0, 0.15);
         }
         .calc-btn:active { transform: translateY(2px); box-shadow: none !important; }
-        
+
         /* 輕鬆配色分類 */
         .btn-num { background: var(--white); color: var(--text); box-shadow: 0 2px 0px var(--accent); }
         .btn-op { background: var(--primary); color: white; box-shadow: 0 2px 0px #358582; }
@@ -118,18 +123,36 @@
         .item-original { font-size: 0.7rem; color: #A4B5B5; }
         .edit-mode input { margin-bottom: 6px; padding: 6px; font-size: 0.85rem; border: 1px solid var(--accent); border-radius: 4px; }
 
-        .total-bar { 
-            position: fixed; bottom: 0; left: 0; width: 100%; background: var(--white); 
-            padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; 
+        .total-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%; background: var(--white);
+            padding: 10px 20px; display: flex; justify-content: space-between; align-items: center;
             border-top: 1px solid var(--accent); border-radius: 12px 12px 0 0; z-index: 1000;
             box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
         }
+
+        body { max-width: 600px; margin: 0 auto; min-height: 100dvh; padding-top: max(5px, env(safe-area-inset-top)); padding-bottom: calc(90px + env(safe-area-inset-bottom)); }
+        .total-bar { max-width: 600px; left: 50%; transform: translateX(-50%); padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
+        button, .calc-btn { touch-action: manipulation; }
+        .calc-btn { min-height: 44px; }
+        .flex-row > .input-group, .flex-row input { min-width: 0; }
+        .app-tools { margin-bottom: 12px; }
+        .install-btn { background: var(--white); color: #276d6b; border: 1px solid var(--accent); border-radius: 8px; padding: 10px 14px; min-height: 44px; cursor: pointer; }
+        .app-status, .install-help { font-size: .75rem; line-height: 1.6; color: #586c6c; }
+        .install-help { background: white; border: 1px solid var(--accent); padding: 12px; border-radius: 8px; margin-top: 8px; }
+        [hidden] { display: none !important; }
+        button:focus-visible, .calc-btn:focus-visible { outline: 2px solid #276d6b; outline-offset: 3px; }
+        button:disabled { opacity: .6; cursor: wait; }
     </style>
 </head>
 <body>
 
-    <div class="app-header">✈️ 換匯計算機</div>
+    <div class="app-header">換匯計算機</div>
 
+    <div class="app-tools">
+        <button id="installApp" class="install-btn" aria-expanded="false" aria-controls="installHelp">安裝到手機</button>
+        <div id="appStatus" class="app-status" role="status">正在準備離線功能…</div>
+        <div id="installHelp" class="install-help" hidden></div>
+    </div>
     <div class="card">
         <div class="flex-row" style="align-items: flex-end; margin-bottom: 10px; gap: 8px;">
             <div class="input-group" style="flex: 1; margin-bottom: 0;">
@@ -150,7 +173,7 @@
                 <label>手動匯率</label>
                 <div class="flex-row">
                     <input type="number" id="rate" step="0.0001" oninput="manualRateInput()" style="flex: 1;">
-                    <button class="side-btn refresh-btn" onclick="fetchRate()">🔄</button>
+                    <button class="side-btn refresh-btn" onclick="fetchRate()" aria-label="更新匯率"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11a9 9 0 0 1 15.4-6.4L21 7M21 3v4h-4M21 13a9 9 0 0 1-15.4 6.4L3 17M7 17H3v4"/></svg></button>
                 </div>
             </div>
         </div>
@@ -166,29 +189,29 @@
         </div>
 
         <div class="calc-container">
-            <div class="calc-btn btn-top" onclick="clearActiveInput()">C</div>
-            <div class="calc-btn btn-top" onclick="backspace()">←</div>
-            <div class="calc-btn btn-top" onclick="inputNum('%')">%</div>
-            <div class="calc-btn btn-op" onclick="inputNum('/')">÷</div>
-            
-            <div class="calc-btn btn-num" onclick="inputNum('7')">7</div>
-            <div class="calc-btn btn-num" onclick="inputNum('8')">8</div>
-            <div class="calc-btn btn-num" onclick="inputNum('9')">9</div>
-            <div class="calc-btn btn-op" onclick="inputNum('*')">×</div>
-            
-            <div class="calc-btn btn-num" onclick="inputNum('4')">4</div>
-            <div class="calc-btn btn-num" onclick="inputNum('5')">5</div>
-            <div class="calc-btn btn-num" onclick="inputNum('6')">6</div>
-            <div class="calc-btn btn-op" onclick="inputNum('-')">−</div>
-            
-            <div class="calc-btn btn-num" onclick="inputNum('1')">1</div>
-            <div class="calc-btn btn-num" onclick="inputNum('2')">2</div>
-            <div class="calc-btn btn-num" onclick="inputNum('3')">3</div>
-            <div class="calc-btn btn-op" onclick="inputNum('+')">+</div>
-            
-            <div class="calc-btn btn-num btn-zero" onclick="inputNum('0')">0</div>
-            <div class="calc-btn btn-num" onclick="inputNum('.')">.</div>
-            <div class="calc-btn btn-op" onclick="evaluateCalc()">=</div>
+            <button type="button" class="calc-btn btn-top" onclick="clearActiveInput()">C</button>
+            <button type="button" class="calc-btn btn-top" onclick="backspace()">←</button>
+            <button type="button" class="calc-btn btn-top" onclick="inputNum('%')">%</button>
+            <button type="button" class="calc-btn btn-op" onclick="inputNum('/')">÷</button>
+
+            <button type="button" class="calc-btn btn-num" onclick="inputNum('7')">7</button>
+            <button type="button" class="calc-btn btn-num" onclick="inputNum('8')">8</button>
+            <button type="button" class="calc-btn btn-num" onclick="inputNum('9')">9</button>
+            <button type="button" class="calc-btn btn-op" onclick="inputNum('*')">×</button>
+
+            <button type="button" class="calc-btn btn-num" onclick="inputNum('4')">4</button>
+            <button type="button" class="calc-btn btn-num" onclick="inputNum('5')">5</button>
+            <button type="button" class="calc-btn btn-num" onclick="inputNum('6')">6</button>
+            <button type="button" class="calc-btn btn-op" onclick="inputNum('-')">−</button>
+
+            <button type="button" class="calc-btn btn-num" onclick="inputNum('1')">1</button>
+            <button type="button" class="calc-btn btn-num" onclick="inputNum('2')">2</button>
+            <button type="button" class="calc-btn btn-num" onclick="inputNum('3')">3</button>
+            <button type="button" class="calc-btn btn-op" onclick="inputNum('+')">+</button>
+
+            <button type="button" class="calc-btn btn-num btn-zero" onclick="inputNum('0')">0</button>
+            <button type="button" class="calc-btn btn-num" onclick="inputNum('.')">.</button>
+            <button type="button" class="calc-btn btn-op" onclick="evaluateCalc()">=</button>
         </div>
 
         <div class="flex-row" style="margin-bottom: 10px;">
@@ -196,7 +219,7 @@
             <div style="flex: 1;"><label>地點</label><input type="text" id="locName" placeholder="地點"></div>
         </div>
 
-        <button class="save-btn" onclick="save()">把這筆記下來！ ✍️</button>
+        <button class="save-btn" onclick="save()">把這筆記下來！</button>
     </div>
 
     <div class="history-header">
@@ -222,7 +245,7 @@
         document.getElementById('currencySelect').value = currentCurrency;
         document.getElementById('currLabel').innerText = currentCurrency;
         const savedRate = localStorage.getItem('manual_rate_' + currentCurrency);
-        document.getElementById('rate').value = savedRate || 0.1977;
+        document.getElementById('rate').value = savedRate || document.querySelector('#currencySelect option:checked').dataset.rate;
 
         window.onload = function() {
             const fInput = document.getElementById('foreign');
@@ -306,16 +329,18 @@
 
         async function fetchRate() {
             const btn = document.querySelector('.refresh-btn');
-            btn.innerText = "⏳";
+            btn.disabled = true;
             try {
                 const res = await fetch(`https://open.er-api.com/v6/latest/TWD`);
+                if (!res.ok) throw new Error("匯率讀取失敗");
                 const data = await res.json();
+                if (!(data.rates?.[currentCurrency] > 0)) throw new Error("匯率無效");
                 const finalRate = (1 / data.rates[currentCurrency]).toFixed(4);
                 document.getElementById('rate').value = finalRate;
                 localStorage.setItem('manual_rate_' + currentCurrency, finalRate);
                 calculate();
-            } catch (e) { alert("網路異常"); }
-            btn.innerText = "🔄";
+            } catch (e) { alert("目前無法更新匯率，請檢查網路。你仍可使用已儲存的匯率，或手動輸入匯率。"); }
+            btn.disabled = false;
         }
 
         function save() {
@@ -392,8 +417,8 @@
                     return `<div class="history-item">
                         <div class="item-main">
                             <div class="action-group">
-                                <button class="icon-btn btn-edit-icon" onclick="toggleEdit(${h.id})">✏️</button>
-                                <button class="icon-btn btn-del-icon" onclick="deleteItem(${h.id})">✕</button>
+                                <button class="icon-btn btn-edit-icon" onclick="toggleEdit(${h.id})" aria-label="編輯紀錄"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16 3 5 5-12 12-6 1 1-6Z M14 5l5 5"/></svg></button>
+                                <button class="icon-btn btn-del-icon" onclick="deleteItem(${h.id})" aria-label="刪除紀錄"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg></button>
                             </div>
                             <div class="item-info">
                                 <div class="item-title">${h.note}${h.loc ? `<span style="font-size:0.7rem; color:#A4B5B5; font-weight:normal;"> @ ${h.loc}</span>` : ''}</div>
