@@ -1,6 +1,6 @@
 // Increment the version when changing any application asset.
 const CACHE_PREFIX = 'exchange-app-';
-const CACHE_NAME = CACHE_PREFIX + 'v1';
+const CACHE_NAME = CACHE_PREFIX + 'v2';
 const ASSETS = ['./', './index.html', './pwa.js', './manifest.webmanifest', './icon.png', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', event => {

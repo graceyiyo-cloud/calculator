@@ -135,10 +135,7 @@
         button, .calc-btn { touch-action: manipulation; }
         .calc-btn { min-height: 44px; }
         .flex-row > .input-group, .flex-row input { min-width: 0; }
-        .app-tools { margin-bottom: 12px; }
-        .install-btn { background: var(--white); color: #276d6b; border: 1px solid var(--accent); border-radius: 8px; padding: 10px 14px; min-height: 44px; cursor: pointer; }
-        .app-status, .install-help { font-size: .75rem; line-height: 1.6; color: #586c6c; }
-        .install-help { background: white; border: 1px solid var(--accent); padding: 12px; border-radius: 8px; margin-top: 8px; }
+        .app-status { margin-bottom: 12px; font-size: .75rem; line-height: 1.6; color: #586c6c; }
         [hidden] { display: none !important; }
         button:focus-visible, .calc-btn:focus-visible { outline: 2px solid #276d6b; outline-offset: 3px; }
         button:disabled { opacity: .6; cursor: wait; }
@@ -148,11 +145,7 @@
 
     <div class="app-header">換匯計算機</div>
 
-    <div class="app-tools">
-        <button id="installApp" class="install-btn" aria-expanded="false" aria-controls="installHelp">安裝到手機</button>
-        <div id="appStatus" class="app-status" role="status">正在準備離線功能…</div>
-        <div id="installHelp" class="install-help" hidden></div>
-    </div>
+    <div id="appStatus" class="app-status" role="status">正在準備離線功能…</div>
     <div class="card">
         <div class="flex-row" style="align-items: flex-end; margin-bottom: 10px; gap: 8px;">
             <div class="input-group" style="flex: 1; margin-bottom: 0;">
